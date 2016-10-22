@@ -14,7 +14,7 @@
 
 
 
-void Renderer::setup(int w,int h)
+void Renderer::setCanvas(int w,int h)
 {
   width  = w;
   height = h;
@@ -118,11 +118,11 @@ void Renderer::drawVolume(float ke,float ka,float step)
   // [a/u/v]   all,ultraviolet,visible.
   
   // Extinction coefficients.
-  float KeExt[2] = {2.0f,0.6f};
-  float KrExt[2] = {2.0f,0.6f};
+  float KeExt[2] = {Ke[0],Ke[1]};
+  float KrExt[2] = {Kr[0],Kr[1]};
   // Albedo values.
-  float Ae[2] = {0.8,0.1};
-  float Ar[2] = {0.0,0.6};
+  float Ae[2] = {Ke[2],Ke[3]};
+  float Ar[2] = {Kr[2],Kr[3]};
   
   float KeSctu = KeExt[1]*Ae[0];
   float KrSctv = KrExt[1]*Ar[1];
@@ -185,19 +185,67 @@ void Renderer::drawVolume(float ke,float ka,float step)
   }
 }
 
-bool Renderer::loadVolumeMaterial(const char* filename)
+void Renderer::computeLightingVolume(void)
 {
-  return loadVolume(b_material,filename);
-}
+  b_lighting.set(b_material.width,b_material.height,2);
+  b_lighting.setKs(b_material.getKs());
+  
+  float step = 1.0f;
+  int numel = b_lighting.getNumel();
+  for(int i=0;i<numel;i++)
+  {
+    Vector3  xyz;
+    uint16_t uvw[3];
+    b_material.getcoord(i,uvw,xyz.ptr());
+    
+    Vector3 src(0,0,0);
+    Vector3 dst = xyz;
+    
+    // Direction of the marching.
+    Vector3 dir = normalize(dst-src);
+    // Compute the distance.
+    float dist = (dst-src).norm();
+    // Compute the number of steps.
+    int   nstep = std::ceil(dist / step);
+    // Adjust the step length based on the step number.
+    float fstep = dist / nstep;
+    // Adjust the starting point so we sample at the center of each step.
+    src  = src + dir * fstep/2;
+    
+    // Extinction coefficients.
+    float KeExt[2] = {Ke[0],Ke[1]};
+    float KrExt[2] = {Kr[0],Kr[1]};
+    
+    // This is the radiance of the star.
+    // The first component represents ultraviolet radiance strength.
+    // The second component represents visible radiance strength.
+    float energy[3] = {1.0f,1.0f};
+    for(int i=0;i<nstep;i++)
+    {
+      Vector3 val;
+      Vector3 pos = src + dir * i * fstep;
+      
+      if(b_material.query(pos.ptr(),val.ptr())==false)
+        continue;
 
-bool Renderer::loadVolumeLighting(const char* filename)
-{
-  return loadVolume(b_lighting,filename);
-}
+      float DaExt[2];
+      DaExt[0] = KeExt[0]*val[0]+KrExt[0]*val[1];
+      DaExt[1] = KeExt[1]*val[0]+KrExt[1]*val[1];
 
-bool Renderer::loadVolume(VBF &volume,const char* filename)
-{
-  return volume.read(filename);
+      for(int k=0;k<2;k++)
+        energy[k] = energy[k] * std::exp(-DaExt[k]*fstep);
+    }
+
+    for(int k=0;k<2;k++)
+      energy[k] = energy[k] / ((dist/b_material.getKs() + 1));
+
+    for(int k=0;k<2;k++)
+      b_lighting.setvalue(uvw[0],uvw[1],uvw[2],energy);
+    
+    if(i%100==0)
+      printf("-------- %4.1f%% -------- \r",100.0f*i/numel);
+    
+  }
 }
 
 void Renderer::setVolumeScale(float ks)

@@ -14,26 +14,31 @@ public:
     
   // Specify the dimension of the canvas.
   // Execute this as an initialization.
-  void setup(int width,int height);
+  void setCanvas(int width,int height);
   
   // Replace the camera configuration by the given one.
   void setCamera(const Camera &cam){camera=cam;}
   // Get the reference of the current camera.
   Camera& getCamera(void){return camera;}
 
+  
+  bool setMaterialVolume(const char *filename){return b_material.read(filename);}
+  VBF& getMaterialVolume(void){return b_material;}
+
+  bool setLightingVolume(const char *filename){return b_lighting.read(filename);}
+  VBF& getLightingVolume(void){return b_lighting;}
+  // Pre-compute the lighting field from the material volume.
+  void computeLightingVolume(void);
+  
+  // Set Ks for all volumes.
+  void setVolumeScale(float ks);
+
   // Draw a line.
   void drawLine(Vector3 srt,Vector3 end,Vector3 color);
-  
   // Draw a wireframe cube.
   void drawCube(float radius,int tick,Vector3 color);
   
-  // Load the material volume.
-  bool loadVolumeMaterial(const char* filename);
-
-  // Load the lighting volume.
-  bool loadVolumeLighting(const char* filename);
   
-  void setVolumeScale(float ks);
 
   //
   void drawVolume(float ke,float ka,float step);
@@ -54,9 +59,16 @@ public:
   VBF b_lighting;
   
   
-private:
+  // Parameters that model emission nabulae and
+  // reflection nebulae.
+  // [0]: extinction coefficient for ultraviolet radiance.
+  // [1]: extinction coefficient for visible radiance.
+  // [2]: albedo for ultraviolet radiance.
+  // [3]: albedo for visible radiance.
+  float Ke[4];
+  float Kr[4];
   
-  bool loadVolume(VBF &volume,const char* filename);
+private:
   
 };
 
