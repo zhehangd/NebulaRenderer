@@ -4,7 +4,7 @@
 // Data:   Sep. 07, 2016
 
 #include <cmath>
-#include "Math.h"
+#include "Math.hpp"
 
 float Vector3::normalize(void)
 {

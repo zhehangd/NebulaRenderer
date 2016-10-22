@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <cmath>
 
-#include "Perlin3d.h"
+#include "Perlin3d.hpp"
 
 using namespace std;
 

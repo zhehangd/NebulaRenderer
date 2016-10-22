@@ -6,10 +6,10 @@
 #include <chrono>
 #include <cassert>
 
-#include "Camera.h"
-#include "Image.h"
-#include "Math.h"
-#include "VBF.h"
+#include "Camera.hpp"
+#include "Image.hpp"
+#include "Math.hpp"
+#include "VBF.hpp"
 
 
 class Timer

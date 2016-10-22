@@ -3,7 +3,7 @@
 // Email:  dingzhehang1993@gmail.com
 // Data:   Oct. 02, 2016
 
-#include "Image.h"
+#include "Image.hpp"
 #include <climits>
 #include <iostream>
 #include <fstream>

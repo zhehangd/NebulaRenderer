@@ -3,7 +3,7 @@
 // Email:  dingzhehang1993@gmail.com
 // Data:   Oct. 15, 2016
 
-#include "Primitive.h"
+#include "Primitive.hpp"
 #include <cmath>
 #include <utility> // swap
 

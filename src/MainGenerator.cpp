@@ -1,6 +1,6 @@
-#include "Image.h"
-#include "Perlin3d.h"
-#include "VBF.h"
+#include "Image.hpp"
+#include "Perlin3d.hpp"
+#include "VBF.hpp"
 
 #include <iostream>
 #include <iomanip>

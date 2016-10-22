@@ -4,13 +4,13 @@
 #include <cstdint>
 #include <cmath>
 
-#include "Camera.h"
-#include "Image.h"
-#include "Math.h"
-#include "Primitive.h"
-#include "Perlin3d.h"
-#include "VBF.h"
-#include "Shader.h"
+#include "Camera.hpp"
+#include "Image.hpp"
+#include "Math.hpp"
+#include "Primitive.hpp"
+#include "Perlin3d.hpp"
+#include "VBF.hpp"
+#include "Shader.hpp"
 
 
 std::ostream& operator<<(std::ostream& ss,const Vector3 &v)

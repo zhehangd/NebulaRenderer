@@ -1,4 +1,4 @@
-#include "VBF.h"
+#include "VBF.hpp"
 
 #include <cmath>
 #include <cstdint>

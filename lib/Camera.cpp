@@ -5,7 +5,7 @@
 
 #include <cmath>
 #include <cstdio>
-#include "Camera.h"
+#include "Camera.hpp"
 
 using namespace std;
 

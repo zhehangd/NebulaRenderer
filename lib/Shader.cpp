@@ -1,4 +1,9 @@
-#include "Shader.h"
+#include "Shader.hpp"
+#include "Primitive.hpp"
+#include "Camera.hpp"
+#include "Image.hpp"
+#include "Math.hpp"
+#include "VBF.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -7,11 +12,7 @@
 #include <cstdint>
 #include <cmath>
 
-#include "Primitive.h"
-#include "Camera.h"
-#include "Image.h"
-#include "Math.h"
-#include "VBF.h"
+
 
 void Renderer::setup(int w,int h)
 {
