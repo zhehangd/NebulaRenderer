@@ -4,7 +4,7 @@
 #include "Primitive.hpp"
 #include "Perlin3d.hpp"
 #include "VBF.hpp"
-#include "Shader.hpp"
+#include "Renderer.hpp"
 #include "Utility.hpp"
 
 #include <iostream>

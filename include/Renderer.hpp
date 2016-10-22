@@ -1,5 +1,5 @@
-#ifndef RENDER_H_ 
-#define RENDER_H_
+#ifndef RENDERER_H_ 
+#define RENDERER_H_
 
 #include <cstdint>
 

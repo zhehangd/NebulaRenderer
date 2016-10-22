@@ -1,4 +1,4 @@
-#include "Shader.hpp"
+#include "Renderer.hpp"
 #include "Primitive.hpp"
 #include "Camera.hpp"
 #include "Image.hpp"

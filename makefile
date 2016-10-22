@@ -18,16 +18,16 @@ ALL   : ngen nren nlight
 ngen  : Image.o Math.o VBF.o Perlin3d.o Utility.o MainGenerator.o
 	$(CXX) -o $@  $^
 
-nren  : Image.o Camera.o Primitive.o Math.o VBF.o Perlin3d.o Shader.o Utility.o MainShader.o
+nren  : Image.o Camera.o Primitive.o Math.o VBF.o Perlin3d.o Renderer.o Utility.o MainRenderer.o
 	$(CXX) -o $@  $^
 	
-nlight: Image.o Camera.o Math.o VBF.o Primitive.o Shader.o Utility.o MainLighting.o
+nlight: Image.o Camera.o Math.o VBF.o Primitive.o Renderer.o Utility.o MainLighting.o
 	$(CXX) -o $@  $^
 
-MainShader.o :   Image.hpp Camera.hpp Primitive.hpp Math.hpp VBF.hpp Perlin3d.hpp Shader.hpp
+MainRenderer.o :   Image.hpp Camera.hpp Primitive.hpp Math.hpp VBF.hpp Perlin3d.hpp Renderer.hpp
 MainGenerator.o : Image.hpp Math.hpp VBF.hpp Perlin3d.hpp
-MainLighting.o :  Image.hpp Camera.hpp Math.hpp VBF.hpp Shader.hpp
-Shader.o:  Image.hpp Camera.hpp Primitive.hpp Math.hpp VBF.hpp Shader.hpp 
+MainLighting.o :  Image.hpp Camera.hpp Math.hpp VBF.hpp Renderer.hpp
+Renderer.o:  Image.hpp Camera.hpp Primitive.hpp Math.hpp VBF.hpp Renderer.hpp 
 Utility.o: Math.hpp
 
 
