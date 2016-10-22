@@ -109,12 +109,28 @@ void Renderer::drawCube(float radius,int tick,Vector3 color)
 
 void Renderer::drawVolume(float ke,float ka,float step)
 {
-  Vector3 spec[3] = {{1.0f,0.3f,0.6f},{0.4f,0.5f,0.8f},{0,0,0}};
+  Vector3 spec[2] = {{1.0f,0.3f,0.6f},{0.4f,0.5f,0.8f}};
+
+  //
+  // K[e/r/a][Ext/Sct][a/u/v]
+  // [e/r/a]   emission, reflection, all.
+  // [Ext/Sct] extinction, scattering.
+  // [a/u/v]   all,ultraviolet,visible.
+  
+  // Extinction coefficients.
+  float KeExt[2] = {2.0f,0.6f};
+  float KrExt[2] = {2.0f,0.6f};
+  // Albedo values.
+  float Ae[2] = {0.8,0.1};
+  float Ar[2] = {0.0,0.6};
+  
+  float KeSctu = KeExt[1]*Ae[0];
+  float KrSctv = KrExt[1]*Ar[1];
   
   for (unsigned int r = 0; r < height; r++){
     for (unsigned int c = 0; c < width; c++){
       float *pixel = (float*)canvas.ptr(r,c);
-      float *dz   = ((float*)depth.ptr(r,c));
+      float *dz    = (float*)depth.ptr(r,c);
 
       // rayEnd is at the camera plane.
       // raySrt is at where the ray is cast.
@@ -139,30 +155,30 @@ void Renderer::drawVolume(float ke,float ka,float step)
       Vector3 energy;
       for(int i=0;i<3;i++)
         energy[i] = pixel[i];
-      
       for(int i=0;i<nstep;i++)
       {
         Vector3 rayPos = raySrt + rayDir * i * fstep;
         
-        Vector3 value;
-        Vector3 light;
-        if(b_material.query((rayPos).ptr(),value.ptr()))
+        float value[2];
+        float light[2];
+        if(b_material.query((rayPos).ptr(),value))
         {
           isInVolume = true;
-          b_lighting.query((rayPos).ptr(),light.ptr());
+          b_lighting.query((rayPos).ptr(),light);
 
-          float dense = value[0]+value[1]+value[2];
-          value  = spec[0]*value[0]*light[0]+spec[1]*value[1]*light[2];
-
-          energy *= 1 - dense*ka*fstep;//std::exp(-dense*ka*step);
-          energy += (value)*ke*fstep;
+          // Only visible
+          float   DaExtv = KeExt[1]*value[0]+KrExt[1]*value[1];
+          Vector3 DaSctv = spec[0]*(KeSctu*value[0]*light[0])+spec[1]*(KrSctv*value[1]*light[1]);
+          
+          energy *= (1 - DaExtv*fstep);
+          energy +=      DaSctv*fstep;
         }
         else
           if(isInVolume)
             break;
       }
       for(int k=0;k<3;k++)
-        pixel[k] = energy[k];
+        pixel[k] = energy[k]*2;
     }
     if( r % 10 == 0 )
       std::cout<<"progress: "<<std::setw(3)<<r<<"/"<<std::setw(3)<<height<<"\r"<<std::flush;

@@ -47,9 +47,9 @@ public:
   std::uint16_t getHeight(void){return height;}
   
   float setKs(float k){ks=k;}
-  float getKs(float k){return ks;}
+  float getKs(void)const{return ks;}
   float setKv(float k){kv=k;}
-  float getKv(float k){return kv;}
+  float getKv(void)const{return kv;}
   
   void preview(const char* filename,int nslice)const;
   

@@ -27,7 +27,7 @@ int main(int argc,const char **argv)
     //return 1;
   }
   
-  float view = 192;
+  float view = 45;
   const char *material = "material.vbf";
   const char *lighting = "lighting.vbf";
   const char *filename = "output.ppm";
@@ -43,7 +43,7 @@ int main(int argc,const char **argv)
   
   // Setup the renderer.
   Renderer render;
-  render.setup(640,480);
+  render.setup(640/4,480/4);
   
   // Load volumes.
   render.loadVolumeMaterial(material);

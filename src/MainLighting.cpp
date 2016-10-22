@@ -37,10 +37,17 @@ Vector3 fromSrcToDst(Vector3 src,Vector3 dst,VBF &block,float step)
   // Adjust the starting point so we sample at the center of each step.
   src  = src + dir * step/2;
   
-  Vector3 attGas  = Vector3(80,20,80)*3;
-  Vector3 attDust = Vector3(10,60,80)*3;
-  Vector3 attDark = Vector3(80,80,80)*3;
-  Vector3 energy(1.0f,1.0f,1.0f);
+  // Extinction coefficients.
+  float KeExt[2] = {2.0f,0.6f};
+  float KrExt[2] = {2.0f,0.6f};
+  // Albedo values.
+  //float Ae[2] = {0.8,0.8};
+  //float Ar[2] = {0.8,0.8};
+  
+  // This is the radiance of the star.
+  // The first component represents ultraviolet radiance strength.
+  // The second component represents visible radiance strength.
+  float energy[3] = {1.0f,1.0f};
   for(int i=0;i<nstep;i++)
   {
     Vector3 val;
@@ -48,13 +55,21 @@ Vector3 fromSrcToDst(Vector3 src,Vector3 dst,VBF &block,float step)
     
     if(block.query(pos.ptr(),val.ptr())==false)
       continue;
-    
-    Vector3 att = attGas*val[0]+attDust*val[1]+attDark[2]*val[2];
 
-    for(int k=0;k<3;k++)
-      energy[k] = energy[k] * std::exp(-att[k]*step);
+    float DaExt[2];
+    DaExt[0] = KeExt[0]*val[0]+KrExt[0]*val[1];
+    DaExt[1] = KeExt[1]*val[0]+KrExt[1]*val[1];
+
+    for(int k=0;k<2;k++)
+      energy[k] = energy[k] * std::exp(-DaExt[k]*step);
   }
-  return energy;
+  //float x = ((dist/block.getKs() + 1));
+  
+  //if(!(x>=1 && x<=3))
+  //  std::cout<<x<<std::endl;
+  for(int k=0;k<2;k++)
+    energy[k] = energy[k] / ((dist/block.getKs() + 1));
+  return Vector3(energy);
 };
 
 int main(int argc,const char **argv)
@@ -80,11 +95,13 @@ int main(int argc,const char **argv)
   VBF nebula;
   nebula.read(material);
   nebula.preview("preview-input.ppm",8);
+  nebula.setKs(100);
   std::uint32_t numel =  nebula.getNumel();
   std::uint16_t width  = nebula.getWidth();
   std::uint16_t height = nebula.getHeight();
   
-  VBF lightfield(width,height,3);
+  VBF lightfield(width,height,2);
+  lightfield.setKs(100);
   
   Light light;
   light.src   = Vector3(0,0,0);
@@ -99,11 +116,11 @@ int main(int argc,const char **argv)
     
     Vector3 src(0,0,0);
     Vector3 dst = xyz;
-    Vector3 val = fromSrcToDst(src,dst,nebula,0.02);
+    Vector3 val = fromSrcToDst(src,dst,nebula,1);
     
     //std::cout<<dst<<std::endl;
 
-    for(int k=0;k<3;k++)
+    for(int k=0;k<2;k++)
       lightfield.setvalue(uvw[0],uvw[1],uvw[2],val.ptr());
     
     if(i%100==0)

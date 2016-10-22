@@ -40,12 +40,12 @@ int main(int argc,const char **argv)
   
   // Create the volume.
   VBF nebula;
-  nebula.set(size,size,3);
+  nebula.set(size,size,2);
   
   // Initialize Perlin3D modules.
   const int depth = 9;
-  Perlin3D perlin[3][depth] = {};
-  for(int i=0;i<3;i++)
+  Perlin3D perlin[2][depth] = {};
+  for(int i=0;i<2;i++)
     for(int j=0;j<depth;j++)
       perlin[i][j].setseed(j+i*depth+20);
 
@@ -61,14 +61,14 @@ int main(int argc,const char **argv)
     
     // Compute the noise components.
     float noise[3] = {};
-    for(int k=0;k<3;k++){
+    for(int k=0;k<2;k++){
       for(int d=0;d<depth;d++)
         noise[k] += perlin[k][d].perlin(x+0.25,y+0.25,z+0.25,0.8f/(1<<d))/(1<<d);
     }
     
-    float value[3];
+    float value[2];
     // Compute the material density from the noise.
-    for(int k=0;k<3;k++){
+    for(int k=0;k<2;k++){
       value[k] = std::pow(noise[k],4) * 3;
       value[k] = std::fmin(value[k],1.0f);
     }
