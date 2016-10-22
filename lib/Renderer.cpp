@@ -169,9 +169,10 @@ void Renderer::drawVolume(float ke,float ka,float step)
           // Only visible
           float   DaExtv = KeExt[1]*value[0]+KrExt[1]*value[1];
           Vector3 DaSctv = spec[0]*(KeSctu*value[0]*light[0])+spec[1]*(KrSctv*value[1]*light[1]);
+          Vector3 DaAmbv = spec[0]*value[0]*Ke[4]+spec[1]*value[1]*Kr[4];
           
           energy *= (1 - DaExtv*fstep);
-          energy +=      DaSctv*fstep;
+          energy +=      (DaSctv+DaAmbv)*fstep;
         }
         else
           if(isInVolume)
@@ -185,12 +186,11 @@ void Renderer::drawVolume(float ke,float ka,float step)
   }
 }
 
-void Renderer::computeLightingVolume(void)
+void Renderer::computeLightingVolume(Vector3 src,float Ru,float Rv,float att,float step)
 {
   b_lighting.set(b_material.width,b_material.height,2);
   b_lighting.setKs(b_material.getKs());
-  
-  float step = 1.0f;
+
   int numel = b_lighting.getNumel();
   for(int i=0;i<numel;i++)
   {
@@ -198,9 +198,8 @@ void Renderer::computeLightingVolume(void)
     uint16_t uvw[3];
     b_material.getcoord(i,uvw,xyz.ptr());
     
-    Vector3 src(0,0,0);
+    // Destination.
     Vector3 dst = xyz;
-    
     // Direction of the marching.
     Vector3 dir = normalize(dst-src);
     // Compute the distance.
@@ -210,7 +209,7 @@ void Renderer::computeLightingVolume(void)
     // Adjust the step length based on the step number.
     float fstep = dist / nstep;
     // Adjust the starting point so we sample at the center of each step.
-    src  = src + dir * fstep/2;
+    Vector3 pos  = src + dir * fstep/2;
     
     // Extinction coefficients.
     float KeExt[2] = {Ke[0],Ke[1]};
@@ -219,25 +218,26 @@ void Renderer::computeLightingVolume(void)
     // This is the radiance of the star.
     // The first component represents ultraviolet radiance strength.
     // The second component represents visible radiance strength.
-    float energy[3] = {1.0f,1.0f};
+    float energy[2] = {Ru,Rv};
     for(int i=0;i<nstep;i++)
     {
-      Vector3 val;
-      Vector3 pos = src + dir * i * fstep;
       
-      if(b_material.query(pos.ptr(),val.ptr())==false)
+      pos += dir * fstep;
+      
+      Vector3 value;
+      if(b_material.query(pos.ptr(),value.ptr())==false)
         continue;
 
       float DaExt[2];
-      DaExt[0] = KeExt[0]*val[0]+KrExt[0]*val[1];
-      DaExt[1] = KeExt[1]*val[0]+KrExt[1]*val[1];
+      DaExt[0] = KeExt[0]*value[0]+KrExt[0]*value[1];
+      DaExt[1] = KeExt[1]*value[0]+KrExt[1]*value[1];
 
       for(int k=0;k<2;k++)
         energy[k] = energy[k] * std::exp(-DaExt[k]*fstep);
     }
 
     for(int k=0;k<2;k++)
-      energy[k] = energy[k] / ((dist/b_material.getKs() + 1));
+      energy[k] = energy[k] / (att*(dist/b_material.getKs() + 1));
 
     for(int k=0;k<2;k++)
       b_lighting.setvalue(uvw[0],uvw[1],uvw[2],energy);

@@ -35,29 +35,31 @@ int main(int argc,const char **argv)
     //return 1;
   }
   
-  const char *material = "material.vbf";
-  const char *lighting = "lighting.vbf";
+  const char *fileMaterial = "material.vbf";
+  const char *fileLighting = "lighting.vbf";
   
   if(argc>1)
-    material = argv[1];
+    fileMaterial = argv[1];
   if(argc>2)
-    lighting = argv[2];  
+    fileLighting = argv[2];  
 
   Renderer render;
-  render.setMaterialVolume(material);
+  render.setMaterialVolume(fileMaterial);
   render.setVolumeScale(100);
   
-  render.Ke[0] = 2.0; // Extinction coefficient for UV radiance.
-  render.Ke[1] = 0.6; // Extinction coefficient for visible radiance.
-  render.Ke[2] = 0.8; // Albedo for UV radiance.
-  render.Ke[3] = 0.1; // Albedo for visible radiance.
-  render.Kr[0] = 2.0; // Extinction coefficient for UV radiance.
-  render.Kr[1] = 0.6; // Extinction coefficient for visible radiance.
-  render.Kr[2] = 0.0; // Albedo for UV radiance.
-  render.Kr[3] = 0.6; // Albedo for visible radiance.
+  render.Ke[0] = 2.0f; // Extinction coefficient for UV radiance.
+  render.Ke[1] = 0.6f; // Extinction coefficient for visible radiance.
+  render.Ke[2] = 0.8f; // Albedo for UV radiance.
+  render.Ke[3] = 0.1f; // Albedo for visible radiance.
+  render.Ke[4] = 0.1f; // Ambient radiance.
+  render.Kr[0] = 2.0f; // Extinction coefficient for UV radiance.
+  render.Kr[1] = 0.6f; // Extinction coefficient for visible radiance.
+  render.Kr[2] = 0.0f; // Albedo for UV radiance.
+  render.Kr[3] = 0.6f; // Albedo for visible radiance.
+  render.Kr[4] = 0.1f; // Ambient radiance.
   
-  render.computeLightingVolume();
-  render.getLightingVolume().write(lighting);
+  render.computeLightingVolume(Vector3(0,0,0),1.0f,1.0f,1.0f,2.0f);
+  render.getLightingVolume().write(fileLighting);
   
   return 0;
 }

@@ -43,21 +43,23 @@ int main(int argc,const char **argv)
   
   // Setup the renderer.
   Renderer render;
-  render.setCanvas(640/4,480/4);
+  render.setCanvas(640,480);
   
   // Load volumes.
   render.setMaterialVolume(material);
   render.setLightingVolume(lighting);
   render.setVolumeScale(100);
 
-  render.Ke[0] = 2.0; // Extinction coefficient for UV radiance.
-  render.Ke[1] = 0.6; // Extinction coefficient for visible radiance.
-  render.Ke[2] = 0.8; // Albedo for UV radiance.
-  render.Ke[3] = 0.1; // Albedo for visible radiance.
-  render.Kr[0] = 2.0; // Extinction coefficient for UV radiance.
-  render.Kr[1] = 0.6; // Extinction coefficient for visible radiance.
-  render.Kr[2] = 0.0; // Albedo for UV radiance.
-  render.Kr[3] = 0.6; // Albedo for visible radiance.
+  render.Ke[0] = 2.0f; // Extinction coefficient for UV radiance.
+  render.Ke[1] = 0.6f; // Extinction coefficient for visible radiance.
+  render.Ke[2] = 0.8f; // Albedo for UV radiance.
+  render.Ke[3] = 0.1f; // Albedo for visible radiance.
+  render.Ke[4] = 0.01f; // Ambient radiance.
+  render.Kr[0] = 2.0f; // Extinction coefficient for UV radiance.
+  render.Kr[1] = 0.6f; // Extinction coefficient for visible radiance.
+  render.Kr[2] = 0.0f; // Albedo for UV radiance.
+  render.Kr[3] = 0.6f; // Albedo for visible radiance.
+  render.Kr[4] = 0.01f; // Ambient radiance.
 
   // Setup the camera.
   Camera &camera = render.getCamera();

@@ -28,7 +28,7 @@ public:
   bool setLightingVolume(const char *filename){return b_lighting.read(filename);}
   VBF& getLightingVolume(void){return b_lighting;}
   // Pre-compute the lighting field from the material volume.
-  void computeLightingVolume(void);
+  void computeLightingVolume(Vector3 src,float Ru,float Rv,float att,float step);
   
   // Set Ks for all volumes.
   void setVolumeScale(float ks);
@@ -65,8 +65,9 @@ public:
   // [1]: extinction coefficient for visible radiance.
   // [2]: albedo for ultraviolet radiance.
   // [3]: albedo for visible radiance.
-  float Ke[4];
-  float Kr[4];
+  // [4]: ambient radiance.
+  float Ke[5];
+  float Kr[5];
   
 private:
   
