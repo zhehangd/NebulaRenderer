@@ -64,6 +64,7 @@ public:
   bool checkuvw(const float *uvw)const;
   bool checkuvw(const std::uint16_t *uvw)const;
   bool checkuvw(std::uint16_t u,std::uint16_t v,std::uint16_t w)const;
+  bool checkuvw(float u,float v,float w)const;
   
   // Convert between voxel codewords and point values.
   float cw2pt(std::uint8_t cw)const{return (float)cw/255.0f;}

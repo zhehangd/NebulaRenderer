@@ -1,9 +1,3 @@
-#include <iostream>
-#include <iomanip>
-#include <algorithm>
-#include <cstdint>
-#include <cmath>
-
 #include "Camera.hpp"
 #include "Image.hpp"
 #include "Math.hpp"
@@ -11,42 +5,49 @@
 #include "Perlin3d.hpp"
 #include "VBF.hpp"
 #include "Shader.hpp"
+#include "Utility.hpp"
 
-
-std::ostream& operator<<(std::ostream& ss,const Vector3 &v)
-{
-  ss<<std::setprecision(2)<<"("<<v[0]<<","<<v[1]<<","<<v[2]<<")";
-  return ss;
-}
-
-#include <chrono>
-
-class Timer
-{
-public:
-  void start(void){srt=std::chrono::steady_clock::now();}
-  float duration(void){return std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - srt).count();}
-  std::chrono::steady_clock::time_point srt;
-};
-
+#include <iostream>
+#include <iomanip>
+#include <algorithm>
+#include <cstdint>
+#include <cmath>
 
 int main(int argc,const char **argv)
 {
+  if(argc==1){
+    std::cout<<"Nebula Renderer\n"
+        <<"usage: nren material lighting view outputfile\n"
+        <<" material    material volume file. (default material)\n"
+        <<" lighting    lighting volume file. (default lighting)\n"
+        <<" view        horizontal observation angle. (default 192)\n"
+        <<" outputfile  output filename. (default output.ppm)\n"
+        <<"This program render the nebula given the material and\n"
+        <<"lighting volume."<<std::endl;
+    //return 1;
+  }
+  
   float view = 192;
+  const char *material = "material.vbf";
+  const char *lighting = "lighting.vbf";
   const char *filename = "output.ppm";
 
   if(argc>1)
-    view = atof(argv[1]);
+    material = argv[1];
   if(argc>2)
-    filename = argv[2];
+    lighting = argv[2];
+  if(argc>3)
+    view = atof(argv[3]);
+  if(argc>4)
+    filename = argv[4];
   
   // Setup the renderer.
   Renderer render;
   render.setup(640,480);
   
   // Load volumes.
-  render.loadVolumeMaterial("../dat/Nebula-0M.vbf");
-  render.loadVolumeLighting("../dat/Nebula-0L4.vbf");
+  render.loadVolumeMaterial(material);
+  render.loadVolumeLighting(lighting);
   render.setVolumeScale(100);
  
   // Setup the camera.

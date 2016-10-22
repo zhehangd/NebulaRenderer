@@ -10,15 +10,7 @@
 #include "Image.hpp"
 #include "Math.hpp"
 #include "VBF.hpp"
-
-
-class Timer
-{
-public:
-  void start(void){srt=std::chrono::steady_clock::now();}
-  float duration(void){return std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - srt).count();}
-  std::chrono::steady_clock::time_point srt;
-};
+#include "Utility.hpp"
 
 class Light
 {
@@ -28,11 +20,9 @@ public:
   float visib;
 };
 
-std::ostream& operator<<(std::ostream& ss,const Vector3 &v)
-{
-  ss<<std::setprecision(2)<<"("<<v[0]<<","<<v[1]<<","<<v[2]<<")";
-  return ss;
-}
+#include <vector>
+
+//void (*func)(const std::vector<VBF*> &volumeList,const Vector3 &pos,const Vector3 &dir,float step)
 
 Vector3 fromSrcToDst(Vector3 src,Vector3 dst,VBF &block,float step)
 {
@@ -46,11 +36,6 @@ Vector3 fromSrcToDst(Vector3 src,Vector3 dst,VBF &block,float step)
   step = dist / nstep;
   // Adjust the starting point so we sample at the center of each step.
   src  = src + dir * step/2;
-
-  //std::cout<<"SRC: "<<src<<std::endl;
-  //std::cout<<"DST: "<<dst<<std::endl;
-  //std::cout<<"DIR: "<<dir<<std::endl;
-  //std::cout<<"--------------------"<<std::endl;
   
   Vector3 attGas  = Vector3(80,20,80)*3;
   Vector3 attDust = Vector3(10,60,80)*3;
@@ -72,11 +57,29 @@ Vector3 fromSrcToDst(Vector3 src,Vector3 dst,VBF &block,float step)
   return energy;
 };
 
-int main(void)
+int main(int argc,const char **argv)
 {
+  
+  if(argc==1){
+    std::cout<<"Nebula Material Generator\n"
+        <<"usage: nlight material lighting\n"
+        <<" material  input filename.  (default material.vbf)\n"
+        <<" lighting  output filename. (default lighting.vbf)\n"
+        <<"This program precompute lighting given the material volume."<<std::endl;
+    //return 1;
+  }
+  
+  const char *material = "material.vbf";
+  const char *lighting = "lighting.vbf";
+  
+  if(argc>1)
+    material = argv[1];
+  if(argc>2)
+    lighting = argv[2];  
+  
   VBF nebula;
-  nebula.read("../data/Nebula-0M.vbf");
-  nebula.preview("preview-input.ppm",4);
+  nebula.read(material);
+  nebula.preview("preview-input.ppm",8);
   std::uint32_t numel =  nebula.getNumel();
   std::uint16_t width  = nebula.getWidth();
   std::uint16_t height = nebula.getHeight();
@@ -97,6 +100,8 @@ int main(void)
     Vector3 src(0,0,0);
     Vector3 dst = xyz;
     Vector3 val = fromSrcToDst(src,dst,nebula,0.02);
+    
+    //std::cout<<dst<<std::endl;
 
     for(int k=0;k<3;k++)
       lightfield.setvalue(uvw[0],uvw[1],uvw[2],val.ptr());
@@ -108,7 +113,7 @@ int main(void)
   nebula.release();
   
   lightfield.preview("preview-output.ppm",8);
-  lightfield.write("output.vbf");
+  lightfield.write(lighting);
   
   return 0;
 }

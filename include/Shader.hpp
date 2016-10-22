@@ -24,7 +24,7 @@ public:
   // Draw a line.
   void drawLine(Vector3 srt,Vector3 end,Vector3 color);
   
-  // Draw a cube.
+  // Draw a wireframe cube.
   void drawCube(float radius,int tick,Vector3 color);
   
   // Load the material volume.

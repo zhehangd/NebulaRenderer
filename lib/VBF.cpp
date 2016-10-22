@@ -81,44 +81,47 @@ bool VBF::read(const char *filename)
 
 bool VBF::xyz2uvw(const float *xyz,float *uvw)const
 {
-  uvw[0] = (xyz[0]/ks + 1) * (width-1) / 2;
-  uvw[1] = (xyz[1]/ks + (float)height/width) * (width-1) / 2;
-  uvw[2] = (xyz[2]/ks + 1) * (width-1) / 2;
+  uvw[0] = (xyz[0]/ks + 1) * width / 2;
+  uvw[1] = (xyz[1]/ks + (float)height/width) * width / 2;
+  uvw[2] = (xyz[2]/ks + 1) * width / 2;
   return checkuvw(uvw);
 }
 
 void VBF::uvw2xyz(const float *uvw,float *xyz)const
 {
-  xyz[0] = (uvw[0] / (width-1) * 2 - 1) * ks;
-  xyz[1] = (uvw[1] / (width-1) * 2 - (float)height/width) * ks;
-  xyz[2] = (uvw[2] / (width-1) * 2 - 1) * ks;
+  xyz[0] = (uvw[0] / width * 2 - 1) * ks;
+  xyz[1] = (uvw[1] / width * 2 - (float)height/width) * ks;
+  xyz[2] = (uvw[2] / width * 2 - 1) * ks;
 }
 
 bool VBF::checkuvw(const std::uint16_t *uvw)const
 {
-  return    uvw[0]>=0 && uvw[0]<width
-         && uvw[1]>=0 && uvw[1]<height
-         && uvw[2]>=0 && uvw[2]<width;
+  return checkuvw(uvw[0],uvw[1],uvw[2]);
 }
 
 bool VBF::checkuvw(const float *uvw)const
 {
-  return    uvw[0]>=0 && uvw[0]<width
-         && uvw[1]>=0 && uvw[1]<height
-         && uvw[2]>=0 && uvw[2]<width;
+  return checkuvw(uvw[0],uvw[1],uvw[2]);
 }
 
 bool VBF::checkuvw(std::uint16_t u,std::uint16_t v,std::uint16_t w)const
 {
-  return    u>=0 && v<width  && w>=0
-         && u>=0 && v<height && w>=0
-         && u>=0 && v<width  && w>=0;
+  return    u>=0 && u<(width-1)
+         && v>=0 && v<(height-1)
+         && w>=0 && w<(width-1);
+}
+
+bool VBF::checkuvw(float u,float v,float w)const
+{
+  return    u>=0 && u<(width-1)
+         && v>=0 && v<(height-1)
+         && w>=0 && w<(width-1);
 }
 
 bool VBF::query(const float *xyz,float *dst)const
 {
   float fuvw[3] = {};
-  //float cuvw[3] = {};
+  float cuvw[3] = {};
   float auvw[3] = {};
   if(xyz2uvw(xyz,auvw)==false)
   {
@@ -130,22 +133,24 @@ bool VBF::query(const float *xyz,float *dst)const
   for(int i=0;i<3;i++)
   {
     fuvw[i] = std::floor(auvw[i]);
-    //cuvw[i] = std::ceil( auvw[i]);
-    //auvw[i] = auvw[i] - fuvw[i];
+    cuvw[i] = std::ceil( auvw[i]);
+    auvw[i] = auvw[i] - fuvw[i];
   }
   
-  std::uint8_t *m = access(fuvw[0],fuvw[1],fuvw[2]);
-  for(int i=0;i<3;i++)
-    dst[i] = cw2pt(m[i]);
+  //std::uint8_t *m = access(fuvw[0],fuvw[1],fuvw[2]);
+  //for(int i=0;i<3;i++)
+  //  dst[i] = cw2pt(m[i]);
   
-  return true;
-/*
+  //return true;
+
   std::uint8_t* ptr[8] = {
     access(fuvw[0],fuvw[1],fuvw[2]), access(cuvw[0],fuvw[1],fuvw[2]),
     access(fuvw[0],fuvw[1],cuvw[2]), access(cuvw[0],fuvw[1],cuvw[2]),
     access(fuvw[0],cuvw[1],fuvw[2]), access(cuvw[0],cuvw[1],fuvw[2]),
     access(fuvw[0],cuvw[1],cuvw[2]), access(cuvw[0],cuvw[1],cuvw[2]),
   };
+  
+  //  
 
   for(int i=0;i<channels;i++)
   {
@@ -158,7 +163,7 @@ bool VBF::query(const float *xyz,float *dst)const
     float v    = linterp(v0,v1,auvw[1]);
     dst[i] = v;
   }
-  return true;*/
+  return true;
 }
 
 bool VBF::query(float x,float y,float z,float *dst)const
@@ -230,7 +235,7 @@ void VBF::preview(const char* filename,int nslice)const
   file.write(ss.str().c_str(),ss.str().size());
   
   for(std::uint16_t i=0;i<nslice;i++){
-    std::uint16_t v = (nslice==1)? 0 : i*(height-1)/(nslice-1);
+    std::uint16_t v = i*height/(nslice);
     for(std::uint16_t w=0;w<width;w++){
       for(std::uint16_t u=0;u<width;u++){
         std::uint8_t *p = access(u,v,w);

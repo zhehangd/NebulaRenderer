@@ -1,6 +1,7 @@
 #include "Image.hpp"
 #include "Perlin3d.hpp"
 #include "VBF.hpp"
+#include "Utility.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -9,25 +10,46 @@
 
 using namespace std;
 
-int main(void)
+int main(int argc,const char **argv)
 {
-  VBF nebula;
 
-  // Specify the block parameters.
-  int size = 512;
+  if(argc==1){
+    cout<<"Nebula Material Generator\n"
+        <<"usage: ngen size filename seed\n"
+        <<" size      size of the volume to generate. (default 64)\n"
+        <<" filename  output filename. (default material.vbf)\n"
+        <<" seed      random seed. (defualt 20)\n"
+        <<"This program generates a random volume of nebula. Currently\n"
+        <<"this program only has basic function -- it simply uses perlin\n"
+        <<"noise as the material distribution."<<endl;
+    //return 1;
+  }
+  
+  int seed = 20;
+  int size = 64;
+  const char* filename = "material.vbf";
+  
+  if(argc>1)
+    size = atoi(argv[1]);
+  
+  if(argc>2)
+    filename = argv[2];
+  
+  if(argc>3)
+    seed = atoi(argv[3]);
+  
+  // Create the volume.
+  VBF nebula;
   nebula.set(size,size,3);
   
-  // Initialize Perlin3D.
+  // Initialize Perlin3D modules.
   const int depth = 9;
   Perlin3D perlin[3][depth] = {};
   for(int i=0;i<3;i++)
     for(int j=0;j<depth;j++)
       perlin[i][j].setseed(j+i*depth+20);
 
-    
-  float maxValue = 0;
-  float minValue = 1;
-
+  // For each voxel.
   for(int i=0;i<nebula.getNumel();i++)
   {
     // Compute the coordinates.
@@ -45,21 +67,21 @@ int main(void)
     }
     
     float value[3];
-    // Compute the values from the noise.
-    //for(int k=0;k<3;k++)
-    //  value[k] = std::pow(noise[k],4) * 3;
-    // Clamp the values.
-    for(int k=0;k<3;k++)
-      value[k] = std::fmin(noise[k]+0.5f,1.0f);
+    // Compute the material density from the noise.
+    for(int k=0;k<3;k++){
+      value[k] = std::pow(noise[k],4) * 3;
+      value[k] = std::fmin(value[k],1.0f);
+    }
     // Set the values.
     nebula.setvalue(uvw[0],uvw[1],uvw[2],value);
     
+    // Report.
     if(i%100==0)
       printf("-------- %4.1f%% -------- \r",100.0f*i/nebula.getNumel());
   }
   printf("\n");
-  nebula.preview("Preview.ppm",6);
-  nebula.write("block.vbf");
+  nebula.preview("m-preview.ppm",6);
+  nebula.write(filename);
 
   return 0;
 }
