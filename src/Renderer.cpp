@@ -14,22 +14,11 @@
 
 
 Renderer::Renderer(void)
-{
-  Ke[0] = 0.5f;       // Extinction coefficient for UV radiance.
-  Ke[1] = 0.5f;       // Extinction coefficient for visible radiance.
-  Ke[2] = 0.9f;       // Albedo for UV radiance.
-  Ke[3] = 0.0f;       // Albedo for visible radiance.
-  Ke[4] = 0.0f;     // Ambient radiance.
-  Kr[0] = 0.5f;       // Extinction coefficient for UV radiance.
-  Kr[1] = 0.5f;       // Extinction coefficient for visible radiance.
-  Kr[2] = 0.0f;       // Albedo for UV radiance.
-  Kr[3] = 0.9f;       // Albedo for visible radiance.
-  Kr[4] = 0.0f;     // Ambient radiance.
-  
-  Ke[0] = Ke[1] = Kr[0] = Kr[1] = 4.0f;
-  Ke[2] = Kr[3] = 0.9f;
-  Ke[3] = Kr[2] = 0.0f;
-  Ke[4] = Kr[4] = 0.0f;
+{  
+  Ke[0] = Ke[1] = Kr[0] = Kr[1] = 0.04; // Extinction
+  Ke[2] = Kr[3] = 0.9f; // Albedo
+  Ke[3] = Kr[2] = 0.0f; // Albedo
+  Ke[4] = Kr[4] = 0.0f; // Ambient
 }
 
 void Renderer::setCanvas(int w,int h)
@@ -231,7 +220,14 @@ void Renderer::computeLightingVolume(Vector3 src,float Ru,float Rv,float att,flo
 {
   b_lighting.set(b_material.width,b_material.height,2);
   b_lighting.setKs(b_material.getKs());
+  b_lighting.setKv(1.0f);
 
+  std::cout<<"Precomputing the lighting field.\n";
+  std::cout<<"width  = "<<b_material.width<<".\n";
+  std::cout<<"height = "<<b_material.height<<".\n";
+  std::cout<<"Ks = "<<b_material.getKs()<<".\n";
+  std::cout<<"Kv = "<<b_material.getKv()<<".\n";
+  
   int numel = b_lighting.getNumel();
   for(int i=0;i<numel;i++)
   {

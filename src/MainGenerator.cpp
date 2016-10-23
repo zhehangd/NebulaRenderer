@@ -83,11 +83,17 @@ int main(int argc,const char **argv)
       printf("-------- %4.1f%% -------- \r",100.0f*i/nebula.getNumel());
   }*/
   
+  std::cout<<"Generating the nebula."<<std::endl;
+  
   Generator generator;
-  generator.init(size,size,0,1);
+  generator.init(size,size,100,1);
   generator.presetTestA();
   
-  printf("\n");
+  std::cout<<"width  = "<<generator.nebula.getWidth()<<std::endl;
+  std::cout<<"height = "<<generator.nebula.getHeight()<<std::endl;
+  std::cout<<"Ks = "<<generator.nebula.getKs()<<std::endl;
+  std::cout<<"Kv = "<<generator.nebula.getKv()<<std::endl;
+  
   generator.nebula.preview("preview-m.ppm",6);
   generator.nebula.write(filename);
 

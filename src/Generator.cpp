@@ -7,10 +7,16 @@
 #include <cmath> 
 
 
-void Generator::init(int width,int height,float m1,float m2)
+void Generator::init(int width,int height,float Ks,float Kv)
+{
+  nebula.set(width,height,2);
+  nebula.setKs(Ks);
+  nebula.setKv(Kv);
+}
+
+void Generator::presetUniform(float m1,float m2)
 {
   float value[2] = {m1,m2};
-  nebula.set(width,height,2);
   for(int i=0;i<nebula.getNumel();i++){
     nebula.setvalue(i,value);
   }

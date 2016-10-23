@@ -11,10 +11,11 @@ class Generator
 public:
   
   // Create the initial volume
-  void init(int width,int height,float m1,float m2);
+  void init(int width,int height,float Ks=100.0f,float Kv=1.0f);
+  
+  void presetUniform(float m1,float m2);
   
   void presetTestA(void);
-  
   //void init(int width,int height,int seed,float m,float dev,float rat);
   
   void blast(Vector3 src);

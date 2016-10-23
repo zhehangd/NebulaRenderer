@@ -41,22 +41,14 @@ int main(int argc,const char **argv)
   if(argc>4)
     filename = argv[4];
   
-  float scale = 100.0f;
-  
   // Setup the renderer.
   Renderer render;
-  render.setCanvas(640/2,480/2);
+  render.setCanvas(640/4,480/4);
   
   // Load volumes.
   render.setMaterialVolume(material);
   render.setLightingVolume(lighting);
-  render.setVolumeScale(scale);
 
-  render.Ke[0] /= scale;
-  render.Ke[1] /= scale;
-  render.Kr[0] /= scale;
-  render.Kr[1] /= scale;
-  
   // Setup the camera.
   Camera &camera = render.getCamera();
   camera.setupExt(view,5,400);

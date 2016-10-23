@@ -20,7 +20,7 @@ void VBF::release(void)
   kv=1;
 }
 
-bool VBF::set(std::uint16_t w,std::uint16_t h,std::uint16_t ch)
+bool VBF::set(std::uint16_t w,std::uint16_t h,std::uint16_t ch,float ks,float kv)
 {
   // Check validity.
   bool invalid = false;
@@ -36,6 +36,9 @@ bool VBF::set(std::uint16_t w,std::uint16_t h,std::uint16_t ch)
   height    = h;
   channels  = ch;
   numel     = width*width*height;
+  
+  this->ks = ks;
+  this->kv = kv;
   
   du = channels;
   dw = du*width;
@@ -69,13 +72,14 @@ bool VBF::read(const char *filename)
   file.exceptions(std::ifstream::failbit|std::ifstream::failbit);
   file.open(filename,std::istream::binary);
   
+  float ks,kv;
   std::uint16_t w,h,ch;
   file.read((char*)&w,sizeof(std::uint16_t));
   file.read((char*)&h,sizeof(std::uint16_t));
   file.read((char*)&ch,sizeof(std::uint16_t));
   file.read((char*)&ks,sizeof(float));
   file.read((char*)&kv,sizeof(float));
-  bool valid = set(w,h,ch);
+  bool valid = set(w,h,ch,ks,kv);
   if (!valid)
     return false;
   file.read((char*)data,numel*channels*sizeof(std::uint8_t));

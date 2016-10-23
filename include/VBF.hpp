@@ -16,7 +16,7 @@ public:
   ~VBF(void){release();}
   
   // Configurate the VBF.
-  bool set(std::uint16_t w,std::uint16_t h,std::uint16_t ch);
+  bool set(std::uint16_t w,std::uint16_t h,std::uint16_t ch,float ks=1.0f,float kv=1.0f);
   
   // Free the data memory and clear the parameters.
   void release(void);

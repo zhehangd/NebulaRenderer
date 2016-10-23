@@ -42,20 +42,17 @@ int main(int argc,const char **argv)
     fileMaterial = argv[1];
   if(argc>2)
     fileLighting = argv[2];  
-
-  float scale = 100.0f;
   
   Renderer render;
   render.setMaterialVolume(fileMaterial);
-  render.setVolumeScale(scale);
   
-  render.Ke[0] /= scale;
-  render.Ke[1] /= scale;
-  render.Kr[0] /= scale;
-  render.Kr[1] /= scale;
-  
+  std::cout<<"width  = "<<render.b_material.getWidth()<<std::endl;
+  std::cout<<"height = "<<render.b_material.getHeight()<<std::endl;
+  std::cout<<"Ks = "<<render.b_material.getKs()<<std::endl;
+  std::cout<<"Kv = "<<render.b_material.getKv()<<std::endl;
   
   render.computeLightingVolume(Vector3(0,0,100),1.0f,1.0f,1.0f,2.0f);
+  
   render.getLightingVolume().write(fileLighting);
   render.getLightingVolume().preview("preview-l.ppm",6);
   
