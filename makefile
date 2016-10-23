@@ -15,13 +15,13 @@ VPATH    = include lib src test
 
 ALL   : ngen nren nlight
 
-ngen  : Image.o Math.o VBF.o Perlin3d.o Utility.o Generator.o MainGenerator.o
+ngen  : Image.o Math.o VBF.o Perlin3d.o Utility.o Generator.o Console.o MainGenerator.o
 	$(CXX) -o $@  $^
 
-nren  : Image.o Camera.o Primitive.o Math.o VBF.o Perlin3d.o Renderer.o Utility.o MainRenderer.o
+nren  : Image.o Camera.o Primitive.o Math.o VBF.o Perlin3d.o Renderer.o Utility.o Console.o MainRenderer.o
 	$(CXX) -o $@  $^
 	
-nlight: Image.o Camera.o Math.o VBF.o Primitive.o Renderer.o Utility.o MainLighting.o
+nlight: Image.o Camera.o Math.o VBF.o Primitive.o Renderer.o Utility.o Console.o MainLighting.o
 	$(CXX) -o $@  $^
 
 MainRenderer.o :   Image.hpp Camera.hpp Primitive.hpp Math.hpp VBF.hpp Perlin3d.hpp Renderer.hpp
@@ -33,9 +33,11 @@ Generator.o: Math.hpp VBF.hpp Perlin3d.hpp
 
 mt-vbf: Image.o VBF.o mt-vbf.o
 	$(CXX) -o $@  $^
+mt-console: Console.o mt-console.o
+	$(CXX) -o $@  $^
 
 mt-vbf.o: Image.hpp VBF.hpp
-
+mt-console.o : Console.hpp
 clean:
 	@echo clean
-	rm *.o *~ ngen nren nlight mt-vbf
+	rm *.o *~ ngen nren nlight mt-vbf mt-console
