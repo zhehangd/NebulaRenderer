@@ -43,23 +43,22 @@ int main(int argc,const char **argv)
   if(argc>2)
     fileLighting = argv[2];  
 
+  float scale = 100.0f;
+  
   Renderer render;
   render.setMaterialVolume(fileMaterial);
-  render.setVolumeScale(100);
+  render.setVolumeScale(scale);
   
-  render.Ke[0] = 2.0f; // Extinction coefficient for UV radiance.
-  render.Ke[1] = 0.6f; // Extinction coefficient for visible radiance.
-  render.Ke[2] = 0.8f; // Albedo for UV radiance.
-  render.Ke[3] = 0.1f; // Albedo for visible radiance.
-  render.Ke[4] = 0.1f; // Ambient radiance.
-  render.Kr[0] = 2.0f; // Extinction coefficient for UV radiance.
-  render.Kr[1] = 0.6f; // Extinction coefficient for visible radiance.
-  render.Kr[2] = 0.0f; // Albedo for UV radiance.
-  render.Kr[3] = 0.6f; // Albedo for visible radiance.
-  render.Kr[4] = 0.1f; // Ambient radiance.
+  render.Ke[0] /= scale;
+  render.Ke[1] /= scale;
+  render.Kr[0] /= scale;
+  render.Kr[1] /= scale;
   
-  render.computeLightingVolume(Vector3(0,0,0),1.0f,1.0f,1.0f,2.0f);
+  
+  render.computeLightingVolume(Vector3(0,0,100),1.0f,1.0f,1.0f,2.0f);
   render.getLightingVolume().write(fileLighting);
+  render.getLightingVolume().preview("preview-l.ppm",6);
+  
   
   return 0;
 }

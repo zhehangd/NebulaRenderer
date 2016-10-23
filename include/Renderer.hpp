@@ -11,7 +11,9 @@
 class Renderer
 {
 public:
-    
+  
+  Renderer(void);
+  
   // Specify the dimension of the canvas.
   // Execute this as an initialization.
   void setCanvas(int width,int height);
@@ -37,11 +39,12 @@ public:
   void drawLine(Vector3 srt,Vector3 end,Vector3 color);
   // Draw a wireframe cube.
   void drawCube(float radius,int tick,Vector3 color);
-  
+  // Draw
+  void drawOrigin(float radius);
   
 
   //
-  void drawVolume(float ke,float ka,float step);
+  void drawVolume(void);
 
   std::uint16_t width;
   std::uint16_t height;

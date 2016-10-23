@@ -28,7 +28,7 @@ public:
   bool read(const char *filename);
   
   // Access data.
-  std::uint8_t* access(std::uint16_t idx)const{return data+idx*du;}
+  std::uint8_t* access(std::uint32_t idx)const{return data+idx*du;}
   std::uint8_t* access(std::uint16_t u,std::uint16_t v,std::uint16_t w)const{return data+u*du+v*dv+w*dw;}
   //std::uint8_t& code(std::uint16_t u,std::uint16_t v,std::uint16_t w,std::uint16_t ch){return ptr(u,v,w)[ch];}
   //const std::uint8_t& code(std::uint16_t u,std::uint16_t v,std::uint16_t w,std::uint16_t ch)const{return ptr(u,v,w)[ch];}
@@ -38,7 +38,7 @@ public:
   
   bool getvalue(std::uint16_t u,std::uint16_t v,std::uint16_t w,float *dst)const;
   bool setvalue(std::uint16_t u,std::uint16_t v,std::uint16_t w,float *src);
-  bool setvalue(std::uint16_t idx,float *src);
+  bool setvalue(std::uint32_t idx,float *src);
   void getcoord(std::uint16_t u,std::uint16_t v,std::uint16_t w,float *dst)const;
   void getcoord(std::uint32_t idx,uint16_t* uvw,float *xyz=0)const;
   
@@ -67,8 +67,8 @@ public:
   bool checkuvw(float u,float v,float w)const;
   
   // Convert between voxel codewords and point values.
-  float cw2pt(std::uint8_t cw)const{return (float)cw/255.0f;}
-  std::uint8_t pt2cw(float pt)const{return (std::uint8_t)std::round(std::fmin(std::fmax(pt,0),1)*255);}
+  float cw2pt(std::uint8_t cw)const{return (float)cw*kv/255.0f;}
+  std::uint8_t pt2cw(float pt)const{return (std::uint8_t)std::round(std::fmin(std::fmax(pt/kv,0),1)*255);}
   
   // Linear interpolation.
   float linterp(float v1,float v2,float a)const{return (1-a)*v1+a*v2;}

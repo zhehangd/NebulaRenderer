@@ -16,7 +16,7 @@ void VBF::release(void)
   channels = 0;
   width=height=0;
   du=dv=dw=0;
-  ks=1;
+  ks=1; 
   kv=1;
 }
 
@@ -57,6 +57,8 @@ bool VBF::write(const char *filename)const
   file.write((char*)&width,sizeof(std::uint16_t));
   file.write((char*)&height,sizeof(std::uint16_t));
   file.write((char*)&channels,sizeof(std::uint16_t));
+  file.write((char*)&ks,sizeof(float));
+  file.write((char*)&kv,sizeof(float));
   file.write((char*)data,numel*channels*sizeof(std::uint8_t));
   file.close();
 }
@@ -71,7 +73,8 @@ bool VBF::read(const char *filename)
   file.read((char*)&w,sizeof(std::uint16_t));
   file.read((char*)&h,sizeof(std::uint16_t));
   file.read((char*)&ch,sizeof(std::uint16_t));
-  
+  file.read((char*)&ks,sizeof(float));
+  file.read((char*)&kv,sizeof(float));
   bool valid = set(w,h,ch);
   if (!valid)
     return false;
@@ -186,7 +189,7 @@ bool VBF::getvalue(std::uint16_t u,std::uint16_t v,std::uint16_t w,float *dst)co
   return true;
 }
 
-bool VBF::setvalue(std::uint16_t idx,float *src)
+bool VBF::setvalue(std::uint32_t idx,float *src)
 {
   if(idx>=getNumel())
     return false;
@@ -223,8 +226,8 @@ void VBF::getcoord(std::uint32_t idx,uint16_t* uvw,float *xyz)const
 
 void VBF::preview(const char* filename,int nslice)const
 {
-  nslice     = (nslice<1) ? 1 : nslice;
-  int ch   = (channels  >3) ? 3 : channels;
+  nslice = (nslice  <1) ? 1 : nslice;
+  int ch = (channels>3) ? 3 : channels;
   
   std::ostringstream ss;
   ss<<"P6 "<<width<<" "<<width*nslice<<" 255\r";
@@ -235,7 +238,7 @@ void VBF::preview(const char* filename,int nslice)const
   file.write(ss.str().c_str(),ss.str().size());
   
   for(std::uint16_t i=0;i<nslice;i++){
-    std::uint16_t v = i*height/(nslice);
+    std::uint16_t v = i*(height-1)/(nslice-1);
     for(std::uint16_t w=0;w<width;w++){
       for(std::uint16_t u=0;u<width;u++){
         std::uint8_t *p = access(u,v,w);

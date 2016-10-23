@@ -27,7 +27,7 @@ int main(int argc,const char **argv)
     //return 1;
   }
   
-  float view = 45;
+  float view = -85;
   const char *material = "material.vbf";
   const char *lighting = "lighting.vbf";
   const char *filename = "output.ppm";
@@ -41,37 +41,34 @@ int main(int argc,const char **argv)
   if(argc>4)
     filename = argv[4];
   
+  float scale = 100.0f;
+  
   // Setup the renderer.
   Renderer render;
-  render.setCanvas(640,480);
+  render.setCanvas(640/2,480/2);
   
   // Load volumes.
   render.setMaterialVolume(material);
   render.setLightingVolume(lighting);
-  render.setVolumeScale(100);
+  render.setVolumeScale(scale);
 
-  render.Ke[0] = 2.0f; // Extinction coefficient for UV radiance.
-  render.Ke[1] = 0.6f; // Extinction coefficient for visible radiance.
-  render.Ke[2] = 0.8f; // Albedo for UV radiance.
-  render.Ke[3] = 0.1f; // Albedo for visible radiance.
-  render.Ke[4] = 0.01f; // Ambient radiance.
-  render.Kr[0] = 2.0f; // Extinction coefficient for UV radiance.
-  render.Kr[1] = 0.6f; // Extinction coefficient for visible radiance.
-  render.Kr[2] = 0.0f; // Albedo for UV radiance.
-  render.Kr[3] = 0.6f; // Albedo for visible radiance.
-  render.Kr[4] = 0.01f; // Ambient radiance.
-
+  render.Ke[0] /= scale;
+  render.Ke[1] /= scale;
+  render.Kr[0] /= scale;
+  render.Kr[1] /= scale;
+  
   // Setup the camera.
   Camera &camera = render.getCamera();
-  camera.setupExt(view,30,400);
+  camera.setupExt(view,5,400);
   camera.setupInt(2.2,600);
   
-  // Draw the cube.  
+  // Draw the cube.
   render.drawCube(100,1,Vector3(1,1,1)*0.2);
+  render.drawOrigin(150);
   
   // Draw the volume.
   Timer timer; timer.start();
-  render.drawVolume(0.8,0.2,1);
+  render.drawVolume();
   std::cout << "Rendering Time: " << timer.duration() << "s."<<std::endl;;
 
   for (unsigned int r = 0; r < render.height; r++){
@@ -79,7 +76,7 @@ int main(int argc,const char **argv)
       float *pixel = (float*)render.canvas.ptr(r,c);
       for(int k=0;k<3;k++){
         float v = pixel[k];
-        v = v * 2;
+        v = v * 5;
         v = (exp(3*v)-1)/(exp(3*v)+1);
         pixel[k] = std::fmin(v,1);
       }

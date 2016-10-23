@@ -13,6 +13,24 @@
 #include <cmath>
 
 
+Renderer::Renderer(void)
+{
+  Ke[0] = 0.5f;       // Extinction coefficient for UV radiance.
+  Ke[1] = 0.5f;       // Extinction coefficient for visible radiance.
+  Ke[2] = 0.9f;       // Albedo for UV radiance.
+  Ke[3] = 0.0f;       // Albedo for visible radiance.
+  Ke[4] = 0.0f;     // Ambient radiance.
+  Kr[0] = 0.5f;       // Extinction coefficient for UV radiance.
+  Kr[1] = 0.5f;       // Extinction coefficient for visible radiance.
+  Kr[2] = 0.0f;       // Albedo for UV radiance.
+  Kr[3] = 0.9f;       // Albedo for visible radiance.
+  Kr[4] = 0.0f;     // Ambient radiance.
+  
+  Ke[0] = Ke[1] = Kr[0] = Kr[1] = 4.0f;
+  Ke[2] = Kr[3] = 0.9f;
+  Ke[3] = Kr[2] = 0.0f;
+  Ke[4] = Kr[4] = 0.0f;
+}
 
 void Renderer::setCanvas(int w,int h)
 {
@@ -107,9 +125,22 @@ void Renderer::drawCube(float radius,int tick,Vector3 color)
   }
 }
 
-void Renderer::drawVolume(float ke,float ka,float step)
+void Renderer::drawOrigin(float radius)
 {
-  Vector3 spec[2] = {{1.0f,0.3f,0.6f},{0.4f,0.5f,0.8f}};
+  for(int i=0;i<3;i++)
+  {
+    Vector3 srt,end,color;
+    end[i] = radius;
+    color[i] = 1;
+    drawLine(srt,end,color);
+  }
+}
+
+void Renderer::drawVolume(void)
+{
+  float step = 1;
+  Vector3 spec[2] = {{1.0f,0.3f,0.6f},{0.2f,0.3f,0.5f}};
+  //Vector3 spec[2] = {{1.0f,0.0f,0.0f},{0.0f,0.0f,1.0f}};
 
   //
   // K[e/r/a][Ext/Sct][a/u/v]
@@ -151,35 +182,45 @@ void Renderer::drawVolume(float ke,float ka,float step)
       raySrt  = raySrt + rayDir * fstep/2;
 
       //
-      bool isInVolume = false;
+      bool hasInVolume = false;
       Vector3 energy;
       for(int i=0;i<3;i++)
         energy[i] = pixel[i];
       for(int i=0;i<nstep;i++)
       {
+        // Move a step.
         Vector3 rayPos = raySrt + rayDir * i * fstep;
+        //
+        float density[2];
+        float radiance[2];
         
-        float value[2];
-        float light[2];
-        if(b_material.query((rayPos).ptr(),value))
-        {
-          isInVolume = true;
-          b_lighting.query((rayPos).ptr(),light);
-
-          // Only visible
-          float   DaExtv = KeExt[1]*value[0]+KrExt[1]*value[1];
-          Vector3 DaSctv = spec[0]*(KeSctu*value[0]*light[0])+spec[1]*(KrSctv*value[1]*light[1]);
-          Vector3 DaAmbv = spec[0]*value[0]*Ke[4]+spec[1]*value[1]*Kr[4];
-          
-          energy *= (1 - DaExtv*fstep);
-          energy +=      (DaSctv+DaAmbv)*fstep;
-        }
-        else
-          if(isInVolume)
+        // 
+        bool  flag = true;
+        flag &= b_material.query((rayPos).ptr(),density);
+        flag &= b_lighting.query((rayPos).ptr(),radiance);
+        if(flag == false)
+          if(hasInVolume)
             break;
+          else
+            continue;
+        else
+          hasInVolume = true;
+
+        //density[0] = std::exp(2.3026f*density[0]);
+        //density[1] = std::exp(2.3026f*density[1]);
+        
+        // Only visible
+        float   DaExtv = KeExt[1]*density[0]+KrExt[1]*density[1];
+        Vector3 DaSctv = spec[0]*(KeSctu*density[0]*radiance[0])+spec[1]*(KrSctv*density[1]*radiance[1]);
+        Vector3 DaAmbv = spec[0]*density[0]*Ke[4]+spec[1]*density[1]*Kr[4];
+        
+        energy *= std::exp(-DaExtv*fstep);
+        energy += (DaSctv+DaAmbv)*fstep;
+
       }
-      for(int k=0;k<3;k++)
-        pixel[k] = energy[k]*2;
+      
+      for(int i=0;i<3;i++)
+        pixel[i] = energy[i];
     }
     if( r % 10 == 0 )
       std::cout<<"progress: "<<std::setw(3)<<r<<"/"<<std::setw(3)<<height<<"\r"<<std::flush;
@@ -221,23 +262,26 @@ void Renderer::computeLightingVolume(Vector3 src,float Ru,float Rv,float att,flo
     float energy[2] = {Ru,Rv};
     for(int i=0;i<nstep;i++)
     {
-      
       pos += dir * fstep;
-      
+ 
       Vector3 value;
       if(b_material.query(pos.ptr(),value.ptr())==false)
         continue;
 
+      //value[0] = std::exp(2.3026f*value[0]);
+      //value[1] = std::exp(2.3026f*value[1]);
+      
       float DaExt[2];
-      DaExt[0] = KeExt[0]*value[0]+KrExt[0]*value[1];
-      DaExt[1] = KeExt[1]*value[0]+KrExt[1]*value[1];
+      DaExt[0] = KeExt[0]*(value[0])+KrExt[0]*(value[1]);
+      DaExt[1] = KeExt[1]*(value[0])+KrExt[1]*(value[1]);
 
       for(int k=0;k<2;k++)
         energy[k] = energy[k] * std::exp(-DaExt[k]*fstep);
     }
 
-    for(int k=0;k<2;k++)
-      energy[k] = energy[k] / (att*(dist/b_material.getKs() + 1));
+    //float ir = 0.1 * b_lighting.getKs() / (dist + b_lighting.getKs()/10);
+    //for(int k=0;k<2;k++)
+    //  energy[k] = energy[k] * ir;
 
     for(int k=0;k<2;k++)
       b_lighting.setvalue(uvw[0],uvw[1],uvw[2],energy);

@@ -2,6 +2,7 @@
 #include "Perlin3d.hpp"
 #include "VBF.hpp"
 #include "Utility.hpp"
+#include "Generator.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -38,6 +39,8 @@ int main(int argc,const char **argv)
   if(argc>3)
     seed = atoi(argv[3]);
   
+  
+  /*
   // Create the volume.
   VBF nebula;
   nebula.set(size,size,2);
@@ -78,10 +81,15 @@ int main(int argc,const char **argv)
     // Report.
     if(i%100==0)
       printf("-------- %4.1f%% -------- \r",100.0f*i/nebula.getNumel());
-  }
+  }*/
+  
+  Generator generator;
+  generator.init(size,size,0,1);
+  generator.presetTestA();
+  
   printf("\n");
-  nebula.preview("m-preview.ppm",6);
-  nebula.write(filename);
+  generator.nebula.preview("preview-m.ppm",6);
+  generator.nebula.write(filename);
 
   return 0;
 }
