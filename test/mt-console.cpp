@@ -7,6 +7,15 @@
 #include <string>
 #include <map>
 
+bool cmd_generator_init(Console &console)
+{
+  unsigned int width;
+  unsigned int height;
+  console.getVariable("width", width);
+  console.getVariable("height",height);
+  std::cout<<"width  = "<<width <<std::endl;
+  std::cout<<"height = "<<height<<std::endl;
+}
 
 int main(void)
 {
@@ -48,6 +57,17 @@ int main(void)
   std::cout<<"("<<vec[0]<<","<<vec[1]<<","<<vec[2]<<")"<<std::endl;
   console.getVariable("vector3",vec,3,',');
   std::cout<<"("<<vec[0]<<","<<vec[1]<<","<<vec[2]<<")"<<std::endl;
+  
+  console.clear();
+  
+  std::cout<<"---------------------\n\n\n"<<std::endl;
+  console.addVariable("width","64");
+  console.addVariable("height","64");
+  console.addCommand("generator_init",cmd_generator_init);
+  console.show();
+  
+  console.runfile("test/script-console.script");
+  
   return 0;
 };
 

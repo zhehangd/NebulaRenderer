@@ -3,6 +3,7 @@
 #include "VBF.hpp"
 #include "Utility.hpp"
 #include "Generator.hpp"
+#include "Console.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -11,33 +12,121 @@
 
 using namespace std;
 
+// Nebula Generator.
+Generator generator;
+
+bool cmd_generatror_init(Console &console)
+{
+  float ks;
+  float kv;
+  unsigned int width;
+  unsigned int height;
+  std::cout<<"Initialize the volume generator."<<std::endl;
+  bool status = true;
+  status &= console.getVariable("volume_width",width);
+  status &= console.getVariable("volume_height",height);
+  status &= console.getVariable("volume_ks",ks);
+  status &= console.getVariable("volume_kv",kv);
+  std::cout<<"volume_width  = "<< width <<std::endl;
+  std::cout<<"volume_height = "<< height<<std::endl;
+  std::cout<<"volume_ks     = "<< ks    <<std::endl;
+  std::cout<<"volume_kv     = "<< kv    <<std::endl;
+  if(status==false)
+    return false;
+  generator.init(width,height,ks,kv);
+  std::cout<<"----------------------------------"<<std::endl;
+  return true;
+}
+
+bool cmd_generatror_preset_a(Console &console)
+{
+  std::cout<<"Construct the volume with Preset-Test-A."<<std::endl;
+  generator.presetTestA();
+  std::cout<<"----------------------------------"<<std::endl;
+  return true;
+}
+
+bool cmd_generatror_preview(Console &console)
+{
+  std::cout<<"Create a preview file."<<std::endl;
+  
+  std::string  filename;
+  unsigned int nslice;
+  bool status = true;
+  status &= console.getVariable("generator_preview_nslice",nslice);
+  status &= console.getVariable("generator_preview_name",filename);
+  if(status==false)
+    return false;
+  std::cout<<"generator_preview_nslice = "<< nslice   <<std::endl;
+  std::cout<<"generator_preview_name   = "<< filename <<std::endl;
+  generator.nebula.preview(filename.c_str(),nslice);
+  std::cout<<"----------------------------------"<<std::endl;
+  return true;
+}
+
+bool cmd_generatror_save(Console &console)
+{
+  std::cout<<"Save the volume."<<std::endl;
+  std::string  filename;
+  bool status = true;
+  status &= console.getVariable("generator_material_name",filename);
+  if(status==false)
+    return false;
+  std::cout<<"generator_material_name = "<< filename <<std::endl;
+  generator.nebula.write(filename.c_str());
+  std::cout<<"----------------------------------"<<std::endl;
+  return true;
+}
+
+bool cmd_generatror_release(Console &console)
+{
+  std::cout<<"Release the volume from the generator."<<std::endl;
+  generator.nebula.release();
+  std::cout<<"----------------------------------"<<std::endl;
+  return true;
+}
+
+
 int main(int argc,const char **argv)
 {
+  Console console;
+  console.ignore_unknown = true;
+  
+  // ==================== Common ====================
+  console.addVariable("volume_width", "64");
+  console.addVariable("volume_height","64");
+  console.addVariable("volume_ks","100");
+  console.addVariable("volume_kv","1");
 
-  if(argc==1){
-    cout<<"Nebula Material Generator\n"
-        <<"usage: ngen size filename seed\n"
-        <<" size      size of the volume to generate. (default 64)\n"
-        <<" filename  output filename. (default material.vbf)\n"
-        <<" seed      random seed. (defualt 20)\n"
-        <<"This program generates a random volume of nebula. Currently\n"
-        <<"this program only has basic function -- it simply uses perlin\n"
-        <<"noise as the material distribution."<<endl;
-    //return 1;
+  // ==================== Volume Generator ====================
+  
+  
+  
+  
+  console.addVariable("generator_seed",          "20");
+  console.addVariable("generator_preview_name",  "preview-m.ppm");
+  console.addVariable("generator_preview_nslice","6");
+  console.addVariable("generator_material_name", "material.vbf");
+  console.addCommand("cmd_generator_init",         cmd_generatror_init);
+  console.addCommand("cmd_generator_preset_test_a",cmd_generatror_preset_a);
+  console.addCommand("cmd_generator_preview",      cmd_generatror_preview);
+  console.addCommand("cmd_generator_save",         cmd_generatror_save);
+  console.addCommand("cmd_generator_release",      cmd_generatror_release); 
+  
+  
+  std::cout<<"----------------------------------"<<std::endl;
+  
+  
+  if(argc==1)
+  {
+    std::cout<<"Please pass script files as arguments."<<std::endl;
+    return -1;
   }
   
-  int seed = 20;
-  int size = 64;
-  const char* filename = "material.vbf";
+  for(int i=1;i<argc;i++)
+    console.runfile(argv[i]);
   
-  if(argc>1)
-    size = atoi(argv[1]);
-  
-  if(argc>2)
-    filename = argv[2];
-  
-  if(argc>3)
-    seed = atoi(argv[3]);
+  return 0;
   
   
   /*
@@ -82,21 +171,7 @@ int main(int argc,const char **argv)
     if(i%100==0)
       printf("-------- %4.1f%% -------- \r",100.0f*i/nebula.getNumel());
   }*/
-  
-  std::cout<<"Generating the nebula."<<std::endl;
-  
-  Generator generator;
-  generator.init(size,size,100,1);
-  generator.presetTestA();
-  
-  std::cout<<"width  = "<<generator.nebula.getWidth()<<std::endl;
-  std::cout<<"height = "<<generator.nebula.getHeight()<<std::endl;
-  std::cout<<"Ks = "<<generator.nebula.getKs()<<std::endl;
-  std::cout<<"Kv = "<<generator.nebula.getKv()<<std::endl;
-  
-  generator.nebula.preview("preview-m.ppm",6);
-  generator.nebula.write(filename);
 
-  return 0;
+  
 }
 

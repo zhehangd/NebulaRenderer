@@ -1,0 +1,31 @@
+# ------------ Common -----------------
+volume_width  = 64
+volume_height = 64
+volume_ks     = 100
+volume_kv     = 1
+
+nebula_extinction_emission   = 0.004,0.004
+nebula_extinction_reflection = 0.004,0.004
+nebula_albedo_emission       = 0.9,0
+nebula_albedo_reflection     = 0,0.9
+nebula_ambient_emission      = 0
+nebula_ambient_reflection    = 0
+
+# ------------ Generation -----------------
+generator_seed = 20
+generator_preview_name   = preview-m.ppm
+generator_preview_nslice = 6
+generator_material_name  = material.vbf
+
+# Initialize the generator.
+cmd_generator_init
+# Generate a test volume.
+cmd_generator_preset_test_a
+# Show preview.
+cmd_generator_preview
+# Save the volume.
+cmd_generator_save
+# Release the volume.
+cmd_generator_release
+
+# End

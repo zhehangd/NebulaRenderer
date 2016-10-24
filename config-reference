@@ -1,0 +1,69 @@
+volume_width  = 64
+volume_height = 64
+volume_ks     = 100
+volume_kv     = 1
+
+nebula_extinction_emission   = 0.004,0.004
+nebula_extinction_reflection = 0.004,0.004
+nebula_albedo_emission       = 0.9,0
+nebula_albedo_reflection     = 0,0.9
+nebula_ambient_emission      = 0
+nebula_ambient_reflection    = 0
+
+light_position = 0,0,0
+light_radiance = 1,1
+
+canvas_width  = 160
+canvas_height = 120
+canvas_name   = output.ppm
+
+generator_seed = 20
+generator_material_name  = material.vbf
+generator_preview_name   = preview-m.ppm
+generator_preview_nslice = 6
+
+camera_extrinsic_from  = 200,200,200
+camera_extrinsic_to    = 0,0,0
+camera_extrinsic_up    = 0,1,0
+camera_extrinsic_azimuth  = 40
+camera_extrinsic_altitude = 20
+camera_extrinsic_radius   = 400
+camera_intrinsic_focus  = 2.2
+camera_intrinsic_zmax   = 600
+
+renderer_preview_lighting_name   = preview-l.ppm
+renderer_preview_lighting_nslice = 6
+renderer_preview_material_name   = preview-m.ppm
+renderer_preview_material_nslice = 6
+renderer_material_name = material.vbf
+renderer_lighting_name = lighting.vbf
+renderer_lighting_step = 1
+renderer_drawing_step  = 1
+
+
+#------- Commands ----------
+
+cmd_generator_init
+cmd_generator_preset_test_a
+cmd_generator_preview
+cmd_generator_save
+cmd_generator_release
+
+cmd_renderer_open_material
+cmd_renderer_open_lighting
+cmd_renderer_save_material
+cmd_renderer_save_lighting
+cmd_renderer_preview_material
+cmd_renderer_preview_lighting
+
+cmd_renderer_compute_lighting
+cmd_renderer_camera_extrinsic_rectan
+cmd_renderer_camera_extrinsic_sphere
+cmd_renderer_camera_intrinsic
+cmd_renderer_draw_cube
+cmd_renderer_draw_axes
+cmd_renderer_draw_volume
+cmd_renderer_save_canvas
+
+
+# End
