@@ -4,15 +4,19 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 #include <map>
 
 
 // This class parses input from the user, or from a text file.
 // Following the directives, it assigns variables and executes commands.
 
-class Console;
+class   Console;
+typedef bool(*cmd_type)(Console&,std::vector<std::string>&);
+typedef std::map<std::string,std::string> dv_type;
+typedef std::map<std::string,cmd_type> dc_type;
 
-typedef bool(*cmd_type)(Console&);
+//typedef bool(*cmd_type)(Console&,std::vector<std::string>&);
 
 class Console
 {
@@ -21,15 +25,15 @@ public:
   // Register a variable to the dictionary.
   bool addVariable(std::string name,std::string value);
   // Register a command to the dictionary.
-  bool addCommand(std::string name,bool (*f)(Console&));
+  bool addCommand(std::string name,cmd_type f);
   // Clear all registered variables and commands.
   void clear(void){dict_v.clear();dict_c.clear();}
   
   //
   template<class T>
-  bool getVariable(std::string name,T *val,int len,char delimiter=',');
+  bool getVariable(std::string name,T *dst,int len,char del=',');
   template<class T>
-  bool getVariable(std::string name,T &val);
+  bool getVariable(std::string name,T &dst);
 
   
   // Interactive mode.
@@ -42,63 +46,74 @@ public:
   void show(void);
   
   bool ignore_unknown;
+  //bool silent;
   
-private:
+  // Convert a string to a sequence of values of the given type.
+  template<class T> 
+  static bool string_cast(std::string input,T &dst){std::istringstream(input)>>dst;return true;}
+  // Convert a string to a value of the given type.
+  template<class T> 
+  static bool string_cast(std::string input,T *dst,int len,char del=',');
+  
+  static bool meesage_error(std::string message){std::cerr<<"[Error]"<<message<<std::endl;return false;}
+  
+//private:
+  // Remove the blank characters in the beginning and the end of the string.
   static void string_trim_blank(std::string &line);
+  // Remove the characters starting from the first "#" character found.
   static void string_trim_comment(std::string &line);
+  // Split a string delimited by spaces.
+  static void string_split(const std::string &line,std::vector<std::string> &slist);
+  static void string_split(const std::string &line,std::string &head,std::vector<std::string> &slist);
   
+  // Print out messages.
   static void meesage_not_found(std::string key){std::cerr<<"\""<<key<<"\" not found."<<std::endl;}
   static void meesage_has_existed(std::string key){std::cerr<<"\""<<key<<"\" has existed."<<std::endl;}
   static void meesage_variable(std::string name,std::string value){std::cout<<name<<" = \""<<value<<"\""<<std::endl;}
   static void meesage_command(std::string name){std::cout<<name<<std::endl;}
-  
-  std::map<std::string,std::string>::iterator dict_v_find(const std::string &name);
-  std::map<std::string,cmd_type>::iterator    dict_c_find(const std::string &name);
 
-  std::map<std::string,std::string> dict_v;
-  std::map<std::string,cmd_type> dict_c;
+  bool find_var(const std::string &name,dv_type::iterator &iter);
+  bool find_cmd(const std::string &name,dc_type::iterator &iter);
+
+  dv_type dict_v;
+  dc_type dict_c;
   
   
 };
 
-template<class T>
-bool Console::getVariable(std::string name,T *val,int len,char delimiter)
+template<class T> 
+bool Console::string_cast(std::string input,T *dst,int len,char del)
 {
-  auto fvar = dict_v.find(name);
-  if (fvar == dict_v.end()){
-    meesage_not_found(name);
-    return false;
-  }
-  
-  auto value = fvar->second;
-  std::istringstream ss( value );
+  std::istringstream ss( input );
   std::string element;
-  
   for(int i=0;i<len;i++)
   {
-    if(!std::getline(ss,element,delimiter)){
+    if(!std::getline(ss,element,del)){
       for(;i<len;i++)
-        val[i] = 0;
+        dst[i] = 0;
       return false;
     }
-    std::istringstream( element ) >> val[i];
+    std::istringstream( element ) >> dst[i];
   }
-  
   return true;
 }
 
 template<class T>
-bool Console::getVariable(std::string name,T &val)
+bool Console::getVariable(std::string name,T *dst,int len,char del)
 {
-  auto fvar = dict_v.find(name);
-  if (fvar == dict_v.end()){
-    meesage_not_found(name); 
+  dv_type::iterator iter;
+  if(find_var(name,iter)==false)
     return false;
-  }
-  
-  auto value = fvar->second;
-  std::istringstream( value ) >> val;
-  return true;
+  return string_cast(iter->second,dst,len,del);
+}
+
+template<class T>
+bool Console::getVariable(std::string name,T &dst)
+{
+  dv_type::iterator iter;
+  if(find_var(name,iter)==false)
+    return false;
+  return string_cast(iter->second,dst);
 }
 
 #endif

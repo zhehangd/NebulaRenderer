@@ -15,30 +15,27 @@ using namespace std;
 // Nebula Generator.
 Generator generator;
 
-bool cmd_generatror_init(Console &console)
+bool generatror_init(Console &console,std::vector<std::string> &argv)
 {
-  float ks;
-  float kv;
-  unsigned int width;
-  unsigned int height;
   std::cout<<"Initialize the volume generator."<<std::endl;
-  bool status = true;
-  status &= console.getVariable("volume_width",width);
-  status &= console.getVariable("volume_height",height);
-  status &= console.getVariable("volume_ks",ks);
-  status &= console.getVariable("volume_kv",kv);
-  std::cout<<"volume_width  = "<< width <<std::endl;
-  std::cout<<"volume_height = "<< height<<std::endl;
-  std::cout<<"volume_ks     = "<< ks    <<std::endl;
-  std::cout<<"volume_kv     = "<< kv    <<std::endl;
-  if(status==false)
+  if(argv.size()<4){
+    std::cerr<<"Expected width, height, ks, kv."<<std::endl;
     return false;
+  }
+  float ks; Console::string_cast(argv[2],ks);
+  float kv; Console::string_cast(argv[3],kv);
+  unsigned int width;  Console::string_cast(argv[0],width);
+  unsigned int height; Console::string_cast(argv[1],height);
+  if(width==0 || height==0 || ks<0 || kv<0){
+    std::cerr<<"Expected nonzero dimensions.."<<std::endl;
+    return false;
+  }
   generator.init(width,height,ks,kv);
   std::cout<<"----------------------------------"<<std::endl;
   return true;
 }
 
-bool cmd_generatror_preset_a(Console &console)
+bool generatror_preset_a(Console &console,std::vector<std::string> &argv)
 {
   std::cout<<"Construct the volume with Preset-Test-A."<<std::endl;
   generator.presetTestA();
@@ -46,39 +43,34 @@ bool cmd_generatror_preset_a(Console &console)
   return true;
 }
 
-bool cmd_generatror_preview(Console &console)
+bool generatror_preview(Console &console,std::vector<std::string> &argv)
 {
-  std::cout<<"Create a preview file."<<std::endl;
-  
-  std::string  filename;
-  unsigned int nslice;
-  bool status = true;
-  status &= console.getVariable("generator_preview_nslice",nslice);
-  status &= console.getVariable("generator_preview_name",filename);
-  if(status==false)
-    return false;
-  std::cout<<"generator_preview_nslice = "<< nslice   <<std::endl;
-  std::cout<<"generator_preview_name   = "<< filename <<std::endl;
+  std::cout<<"Save a preview of the material."<<std::endl;
+  if(argv.size()<2)
+    return Console::meesage_error("Expected filename and slice number.");
+  std::string filename = argv[0];
+  unsigned int nslice; Console::string_cast(argv[1],nslice);
+  if(nslice==0)
+    return Console::meesage_error("Expected nonzero slice number.");
   generator.nebula.preview(filename.c_str(),nslice);
   std::cout<<"----------------------------------"<<std::endl;
   return true;
 }
 
-bool cmd_generatror_save(Console &console)
+bool generatror_save(Console &console,std::vector<std::string> &argv)
 {
-  std::cout<<"Save the volume."<<std::endl;
-  std::string  filename;
-  bool status = true;
-  status &= console.getVariable("generator_material_name",filename);
-  if(status==false)
-    return false;
-  std::cout<<"generator_material_name = "<< filename <<std::endl;
-  generator.nebula.write(filename.c_str());
+  
+  std::cout<<"Save the material volume."<<std::endl;
+  if(argv.size()==0)
+    return Console::meesage_error("Expected filename.");
+  std::string  filename = argv[0];
+  if(!generator.nebula.write(filename.c_str()))
+    return Console::meesage_error("Cannot write the volume.");
   std::cout<<"----------------------------------"<<std::endl;
   return true;
 }
 
-bool cmd_generatror_release(Console &console)
+bool generatror_release(Console &console,std::vector<std::string> &argv)
 {
   std::cout<<"Release the volume from the generator."<<std::endl;
   generator.nebula.release();
@@ -92,30 +84,13 @@ int main(int argc,const char **argv)
   Console console;
   console.ignore_unknown = true;
   
-  // ==================== Common ====================
-  console.addVariable("volume_width", "64");
-  console.addVariable("volume_height","64");
-  console.addVariable("volume_ks","100");
-  console.addVariable("volume_kv","1");
+  console.addCommand("generator_init",         generatror_init);
+  console.addCommand("generator_preset_test_a",generatror_preset_a);
+  console.addCommand("generator_preview",      generatror_preview);
+  console.addCommand("generator_save",         generatror_save);
+  console.addCommand("generator_release",      generatror_release); 
 
-  // ==================== Volume Generator ====================
-  
-  
-  
-  
-  console.addVariable("generator_seed",          "20");
-  console.addVariable("generator_preview_name",  "preview-m.ppm");
-  console.addVariable("generator_preview_nslice","6");
-  console.addVariable("generator_material_name", "material.vbf");
-  console.addCommand("cmd_generator_init",         cmd_generatror_init);
-  console.addCommand("cmd_generator_preset_test_a",cmd_generatror_preset_a);
-  console.addCommand("cmd_generator_preview",      cmd_generatror_preview);
-  console.addCommand("cmd_generator_save",         cmd_generatror_save);
-  console.addCommand("cmd_generator_release",      cmd_generatror_release); 
-  
-  
   std::cout<<"----------------------------------"<<std::endl;
-  
   
   if(argc==1)
   {

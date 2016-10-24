@@ -17,21 +17,21 @@
 Renderer render;
 
 
-bool cmd_renderer_open_material(Console &console);
-bool cmd_renderer_open_lighting(Console &console);
-bool cmd_renderer_save_material(Console &console);
-bool cmd_renderer_save_lighting(Console &console);
-bool cmd_renderer_preview_material(Console &console);
-bool cmd_renderer_preview_lighting(Console &console);
-bool cmd_renderer_create(Console &console);
-bool cmd_renderer_compute_lighting(Console &console);
-bool cmd_renderer_camera_extrinsic_rectan(Console &console);
-bool cmd_renderer_camera_extrinsic_sphere(Console &console);
-bool cmd_renderer_camera_intrinsic(Console &console);
-bool cmd_renderer_draw_cube(Console &console);
-bool cmd_renderer_draw_axes(Console &console);
-bool cmd_renderer_draw_volume(Console &console);
-bool cmd_renderer_save_canvas(Console &console);
+bool renderer_open_material(Console &console,std::vector<std::string> &argv);
+bool renderer_open_lighting(Console &console,std::vector<std::string> &argv);
+bool renderer_save_material(Console &console,std::vector<std::string> &argv);
+bool renderer_save_lighting(Console &console,std::vector<std::string> &argv);
+bool renderer_preview_material(Console &console,std::vector<std::string> &argv);
+bool renderer_preview_lighting(Console &console,std::vector<std::string> &argv);
+bool renderer_setup_canvas(Console &console,std::vector<std::string> &argv);
+bool renderer_setup_extinct(Console &console,std::vector<std::string> &argv);
+bool renderer_compute_lighting(Console &console,std::vector<std::string> &argv);
+bool renderer_camera_extrinsic(Console &console,std::vector<std::string> &argv);
+bool renderer_camera_intrinsic(Console &console,std::vector<std::string> &argv);
+bool renderer_draw_cube(Console &console,std::vector<std::string> &argv);
+bool renderer_draw_axes(Console &console,std::vector<std::string> &argv);
+bool renderer_draw_volume(Console &console,std::vector<std::string> &argv);
+bool renderer_save_canvas(Console &console,std::vector<std::string> &argv);
 
 
 int main(int argc,const char **argv)
@@ -40,68 +40,25 @@ int main(int argc,const char **argv)
   Console console;
   console.ignore_unknown = true;
 
-  // ==================== Common ====================
-  console.addVariable("volume_width", "64");
-  console.addVariable("volume_height","64");
-  console.addVariable("volume_ks","100");
-  console.addVariable("volume_kv","1");
+  console.addCommand("renderer_setup_canvas",    renderer_setup_canvas);
+  console.addCommand("renderer_setup_extinct",   renderer_setup_extinct);
+  console.addCommand("renderer_open_material",   renderer_open_material);
+  console.addCommand("renderer_open_lighting",   renderer_open_lighting);
+  console.addCommand("renderer_save_material",   renderer_save_material);
+  console.addCommand("renderer_save_lighting",   renderer_save_lighting);
+  console.addCommand("renderer_preview_material",renderer_preview_material);
+  console.addCommand("renderer_preview_lighting",renderer_preview_lighting);
   
-  console.addVariable("canvas_width",  "160");
-  console.addVariable("canvas_height", "120");
-  console.addVariable("canvas_name",   "output");
-  
-  // ==================== Lighting Model ====================
-  console.addVariable("nebula_extinction_emission"  ,"0.004,0.004");
-  console.addVariable("nebula_extinction_reflection","0.004,0.004");
-  console.addVariable("nebula_albedo_emission"      ,"0.9,0");
-  console.addVariable("nebula_albedo_reflection"    ,"0,0.9");
-  console.addVariable("nebula_ambient_emission"     ,"0");
-  console.addVariable("nebula_ambient_reflection"   ,"0");
-  
-  console.addVariable("light_position","0,0,0");
-  console.addVariable("light_radiance","1,1");
-  
-  console.addVariable("camera_extrinsic_from",     "200,200,200");
-  console.addVariable("camera_extrinsic_to",       "0,0,0");
-  console.addVariable("camera_extrinsic_up",       "0,1,0");
-  console.addVariable("camera_extrinsic_azimuth",  "40");
-  console.addVariable("camera_extrinsic_altitude", "20");
-  console.addVariable("camera_extrinsic_radius",   "400");
-  console.addVariable("camera_intrinsic_focus",    "2.2");
-  console.addVariable("camera_intrinsic_zmax",     "600");
+  console.addCommand("renderer_camera_extrinsic", renderer_camera_extrinsic);
+  console.addCommand("renderer_camera_intrinsic",   renderer_camera_intrinsic);
+  console.addCommand("renderer_compute_lighting",   renderer_compute_lighting);
+  console.addCommand("renderer_draw_cube",     renderer_draw_cube);
+  console.addCommand("renderer_draw_axes",    renderer_draw_axes);
+  console.addCommand("renderer_draw_volume",  renderer_draw_volume);
+  console.addCommand("renderer_save_canvas",  renderer_save_canvas);
 
-  console.addVariable("renderer_preview_lighting_name"  ,"preview-l.ppm");
-  console.addVariable("renderer_preview_lighting_nslice","6");
-  console.addVariable("renderer_preview_material_name"  ,"preview-m.ppm");
-  console.addVariable("renderer_preview_material_nslice","6");
-  console.addVariable("renderer_material_name"          ,"material.vbf");
-  console.addVariable("renderer_lighting_name"          ,"lighting.vbf");
-  console.addVariable("renderer_lighting_step"          ,"1");
-  console.addVariable("renderer_drawing_step"           ,"1");
-  
-  console.addCommand("cmd_renderer_create",   cmd_renderer_create);
-  console.addCommand("cmd_renderer_open_material",   cmd_renderer_open_material);
-  console.addCommand("cmd_renderer_open_lighting",   cmd_renderer_open_lighting);
-  console.addCommand("cmd_renderer_save_material",   cmd_renderer_save_material);
-  console.addCommand("cmd_renderer_save_lighting",   cmd_renderer_save_lighting);
-  console.addCommand("cmd_renderer_preview_material",cmd_renderer_preview_material);
-  console.addCommand("cmd_renderer_preview_lighting",cmd_renderer_preview_lighting);
-  
-  
-  console.addCommand("cmd_renderer_camera_extrinsic_rectan", cmd_renderer_camera_extrinsic_rectan);
-  console.addCommand("cmd_renderer_camera_extrinsic_sphere", cmd_renderer_camera_extrinsic_sphere);
-  console.addCommand("cmd_renderer_camera_intrinsic",   cmd_renderer_camera_intrinsic);
-  console.addCommand("cmd_renderer_compute_lighting",   cmd_renderer_compute_lighting);
-  console.addCommand("cmd_renderer_draw_cube",     cmd_renderer_draw_cube);
-  console.addCommand("cmd_renderer_draw_axes",   cmd_renderer_draw_axes);
-  console.addCommand("cmd_renderer_draw_volume",  cmd_renderer_draw_volume);
-  console.addCommand("cmd_renderer_save_canvas",  cmd_renderer_save_canvas);
-    
-  
-  
   std::cout<<"----------------------------------"<<std::endl;
-  
-  
+
   if(argc==1)
   {
     std::cout<<"Please pass script files as arguments."<<std::endl;
@@ -112,321 +69,239 @@ int main(int argc,const char **argv)
     console.runfile(argv[i]);
   
   return 0;
-  
-  float view = -85;
-  const char *material = "material.vbf";
-  const char *lighting = "lighting.vbf";
-  const char *filename = "output.ppm";
-
-  
-  // Setup the renderer.
-  Renderer render;
-  render.setCanvas(640/4,480/4);
-  
-  // Load volumes.
-  render.setMaterialVolume(material);
-  render.setLightingVolume(lighting);
-
-  // Setup the camera.
-  Camera &camera = render.getCamera();
-  camera.setupExt(view,5,400);
-  camera.setupInt(2.2,600);
-  
-  // Draw the cube.
-  render.drawCube(100,1,Vector3(1,1,1)*0.2);
-  render.drawOrigin(150);
-  
-  // Draw the volume.
-  Timer timer; timer.start();
-  render.drawVolume();
-  std::cout << "Rendering Time: " << timer.duration() << "s."<<std::endl;;
-
-  for (unsigned int r = 0; r < render.height; r++){
-    for (unsigned int c = 0; c < render.width; c++){
-      float *pixel = (float*)render.canvas.ptr(r,c);
-      for(int k=0;k<3;k++){
-        float v = pixel[k];
-        v = v * 5;
-        v = (exp(3*v)-1)/(exp(3*v)+1);
-        pixel[k] = std::fmin(v,1);
-      }
-    }
-  }
-  
-  imwrite(render.canvas,filename);
-  
-  return 0;
 }
 
-bool cmd_renderer_create(Console &console)
+bool renderer_setup_canvas(Console &console,std::vector<std::string> &argv)
 {
   std::cout<<"Create the canvas."<<std::endl;
-  unsigned int width;
-  unsigned int height;
-  bool status = true;
-  status &= console.getVariable("canvas_width", width);
-  status &= console.getVariable("canvas_height",height);
-  if(status==false)
+  std::uint16_t width;
+  std::uint16_t height;
+  if(argv.size()<2){
+    std::cerr<<"Expected width and height of the canvas."<<std::endl;
     return false;
+  }
+  Console::string_cast(argv[0],width);
+  Console::string_cast(argv[1],height);
+  if(width==0 || height==0){
+    std::cerr<<"Expected nonzero dimensions.."<<std::endl;
+    return false;
+  }
   render.setCanvas(width,height);
+  std::cout<<"----------------------------------"<<std::endl;
   return true;
 }
 
-bool cmd_renderer_open_material(Console &console)
+bool renderer_setup_extinct(Console &console,std::vector<std::string> &argv)
+{
+  std::cout<<"Set extinction coefficients."<<std::endl;
+  
+  if(argv.size()==0 || ((argv[0]!="Emission")&&(argv[0]!="Reflection")))
+    return Console::meesage_error("Expected type \"Emission\" or \"Reflection\"");
+  if(argv.size()<2)
+    return Console::meesage_error("Expected coefficients.");
+  float K[5]; Console::string_cast(argv[1],K,5);
+  if(argv[0]=="Emission")
+    for(int i=0;i<5;i++)
+      render.Ke[i] = K[i];
+  else
+    for(int i=0;i<5;i++)
+      render.Kr[i] = K[i];
+  std::cout<<"----------------------------------"<<std::endl;
+  return true;
+}
+
+
+bool renderer_open_material(Console &console,std::vector<std::string> &argv)
 {
   std::cout<<"Read the material volume."<<std::endl;
-  std::string  filename;
-  bool status = true;
-  status &= console.getVariable("renderer_material_name",filename);
-  if(status==false)
-    return false;
-  std::cout<<"renderer_material_name = "<< filename <<std::endl;
-  //
-  status &= render.setMaterialVolume(filename.c_str());
-  //
-  if(status==false)
-    return false;
+  if(argv.size()==0)
+    return Console::meesage_error("Expected filename.");
+  std::string  filename = argv[0];
+  if(!render.setMaterialVolume(filename.c_str()))
+    return Console::meesage_error("Cannot read the volume.");
   std::cout<<"----------------------------------"<<std::endl;
   return true;
 }
 
-bool cmd_renderer_open_lighting(Console &console)
+bool renderer_open_lighting(Console &console,std::vector<std::string> &argv)
 {
   std::cout<<"Read the lighting volume."<<std::endl;
-  std::string  filename;
-  bool status = true;
-  status &= console.getVariable("renderer_lighting_name",filename);
-  if(status==false)
-    return false;
-  std::cout<<"renderer_lighting_name = "<< filename <<std::endl;
-  //
-  status &= render.setLightingVolume(filename.c_str());
-  //
-  if(status==false)
-    return false;
+  if(argv.size()==0)
+    return Console::meesage_error("Expected filename.");
+  std::string  filename = argv[0];
+  if(!render.setLightingVolume(filename.c_str()))
+    return Console::meesage_error("Cannot read the volume.");
   std::cout<<"----------------------------------"<<std::endl;
   return true;
 }
 
-bool cmd_renderer_save_material(Console &console)
+bool renderer_save_material(Console &console,std::vector<std::string> &argv)
 {
   std::cout<<"Save the material volume."<<std::endl;
-  std::string  filename;
-  bool status = true;
-  status &= console.getVariable("renderer_material_name",filename);
-  if(status==false)
-    return false;
-  std::cout<<"renderer_material_name = "<< filename <<std::endl;
-  //
-  render.getMaterialVolume().write(filename.c_str());
-  //
-  if(status==false)
-    return false;
+  if(argv.size()==0)
+    return Console::meesage_error("Expected filename.");
+  std::string  filename = argv[0];
+  if(!render.getMaterialVolume().write(filename.c_str()))
+    return Console::meesage_error("Cannot write the volume.");
   std::cout<<"----------------------------------"<<std::endl;
   return true;
 }
 
-bool cmd_renderer_save_lighting(Console &console)
+bool renderer_save_lighting(Console &console,std::vector<std::string> &argv)
 {
   std::cout<<"Save the lighting volume."<<std::endl;
-  std::string  filename;
-  bool status = true;
-  status &= console.getVariable("renderer_lighting_name",filename);
-  if(status==false)
-    return false;
-  std::cout<<"renderer_lighting_name = "<< filename <<std::endl;
-  //
-  render.getLightingVolume().write(filename.c_str());
-  //
-  if(status==false)
-    return false;
+  if(argv.size()==0)
+    return Console::meesage_error("Expected filename.");
+  std::string  filename = argv[0];
+  if(!render.getLightingVolume().write(filename.c_str()))
+    return Console::meesage_error("Cannot write the volume.");
   std::cout<<"----------------------------------"<<std::endl;
   return true;
 }
 
-bool cmd_renderer_preview_material(Console &console)
+bool renderer_preview_material(Console &console,std::vector<std::string> &argv)
 {
-  std::cout<<"Create preview of the material."<<std::endl;
-  
-  std::string  filename;
-  unsigned int nslice;
-  bool status = true;
-  status &= console.getVariable("renderer_preview_material_nslice",nslice);
-  status &= console.getVariable("renderer_preview_material_name",filename);
-  if(status==false)
-    return false;
-  std::cout<<"renderer_preview_material_nslice = "<< nslice   <<std::endl;
-  std::cout<<"renderer_preview_material_name   = "<< filename <<std::endl;
-  //
+  std::cout<<"Save a preview of the material."<<std::endl;
+  if(argv.size()<2)
+    return Console::meesage_error("Expected filename and slice number.");
+  std::string filename = argv[0];
+  unsigned int nslice; Console::string_cast(argv[1],nslice);
+  if(nslice==0)
+    return Console::meesage_error("Expected nonzero slice number.");
   render.getMaterialVolume().preview(filename.c_str(),nslice);
-  //
   std::cout<<"----------------------------------"<<std::endl;
   return true;
 }
 
-bool cmd_renderer_preview_lighting(Console &console)
+bool renderer_preview_lighting(Console &console,std::vector<std::string> &argv)
 {
   std::cout<<"Create preview of the lighting."<<std::endl;
-  
-  std::string  filename;
-  unsigned int nslice;
-  bool status = true;
-  status &= console.getVariable("renderer_preview_lighting_nslice",nslice);
-  status &= console.getVariable("renderer_preview_lighting_name",filename);
-  if(status==false)
-    return false;
-  std::cout<<"renderer_preview_lighting_nslice = "<< nslice   <<std::endl;
-  std::cout<<"renderer_preview_lighting_name   = "<< filename <<std::endl;
-  //
+  if(argv.size()<2)
+    return Console::meesage_error("Expected filename and slice number.");
+  std::string filename = argv[0];
+  unsigned int nslice; Console::string_cast(argv[1],nslice);
+  if(nslice==0)
+    return Console::meesage_error("Expected nonzero slice number.");
   render.getLightingVolume().preview(filename.c_str(),nslice);
-  //
   std::cout<<"----------------------------------"<<std::endl;
   return true;
 }
 
-bool cmd_renderer_compute_lighting(Console &console)
+bool renderer_compute_lighting(Console &console,std::vector<std::string> &argv)
 {
   std::cout<<"Compute the lighting volume from the material."<<std::endl;
-  Vector3 light_pos;
-  Vector3 light_rad;
-  float step;
-  float Ke[5];
-  float Kr[5];
-  bool status = true;
-  status &= console.getVariable("light_position", light_pos.ptr(),3);
-  status &= console.getVariable("light_radiance", light_rad.ptr(),2);
-  status &= console.getVariable("renderer_lighting_step",  step);
-  status &= console.getVariable("nebula_extinction_emission"  ,Ke+0,2);
-  status &= console.getVariable("nebula_extinction_reflection",Kr+0,2);
-  status &= console.getVariable("nebula_albedo_emission"  ,    Ke+2,2);
-  status &= console.getVariable("nebula_albedo_reflection",    Kr+2,2);
-  status &= console.getVariable("nebula_ambient_emission"  ,   Ke+4,1);
-  status &= console.getVariable("nebula_ambient_reflection",   Kr+4,1);
-  if(status==false)
-    return false;
-  for(int i=0;i<5;i++){
-    render.Ke[i] = Ke[i];
-    render.Kr[i] = Kr[i];
+  
+  if(argv.size()<3)
+    return Console::meesage_error("Expected position, radiance, and step.");
+  
+  Vector3 position; Console::string_cast(argv[0],position.ptr(),3);
+  Vector3 radiance; Console::string_cast(argv[1],radiance.ptr(),2);
+  float step;       Console::string_cast(argv[2],step);
+
+  render.computeLightingVolume(position,radiance[0],radiance[1],step);
+  //
+  std::cout<<"----------------------------------"<<std::endl;
+  return true;
+}
+
+
+bool renderer_camera_extrinsic(Console &console,std::vector<std::string> &argv)
+{
+  std::cout<<"Set camera extrinsic parameters."<<std::endl;
+  
+  if(argv.size()==0 || ((argv[0]!="Rect")&&(argv[0]!="Polar")))
+    return Console::meesage_error("Expected mode \"Rect\" or \"Polar\"");
+  
+  if(argv[0]=="Rect")
+  {
+    if(argv.size()<4)
+      return Console::meesage_error("Expected LookFrom, LookAt, and LookUp vectors.");
+    Vector3 lookfrom; Console::string_cast(argv[1],lookfrom.ptr(),3);
+    Vector3 lookat;   Console::string_cast(argv[2],lookat.ptr()  ,3);
+    Vector3 lookup;   Console::string_cast(argv[3],lookup.ptr()  ,3);
+    render.getCamera().setupExt(lookfrom.ptr(),lookat.ptr(),lookup.ptr());
   }
-  std::cout<<"light_position = "<< light_pos <<std::endl;
-  std::cout<<"light_radiance = "<< light_rad <<std::endl;
-  std::cout<<"renderer_lighting_step  = "<< step <<std::endl;
-  std::cout<<"Ke = "; for(int i=0;i<5;i++) std::cout<<" "<<Ke[i]; std::cout<<std::endl;
-  std::cout<<"Kr = "; for(int i=0;i<5;i++) std::cout<<" "<<Kr[i]; std::cout<<std::endl;
-  //
-  render.computeLightingVolume(light_pos,light_rad[0],light_rad[1],1.0f,step);
-  //
+  else
+  {
+    if(argv.size()<4)
+      return Console::meesage_error("Expected azimuth, altitude, and radius.");
+    float azimuth;  Console::string_cast(argv[1],azimuth);
+    float altitude; Console::string_cast(argv[2],altitude);
+    float radius;   Console::string_cast(argv[3],radius);
+    if(radius==0)
+      return Console::meesage_error("Expected nonzero radius.");
+    render.getCamera().setupExt(azimuth,altitude,radius);
+  }
   std::cout<<"----------------------------------"<<std::endl;
   return true;
 }
 
-bool cmd_renderer_camera_extrinsic_rectan(Console &console)
-{
-  std::cout<<"Set camera extrinsic parameters."<<std::endl;
-  Vector3 cameraFrom;
-  Vector3 cameraTo;
-  Vector3 cameraUp;
-  bool status = true;
-  status &= console.getVariable("camera_extrinsic_from",cameraFrom.ptr(),3);
-  status &= console.getVariable("camera_extrinsic_to",cameraTo.ptr(),3);
-  status &= console.getVariable("camera_extrinsic_up",cameraUp.ptr(),3);
-  if(status==false)
-    return false;
-  std::cout<<"camera_extrinsic_from = "<< cameraFrom <<std::endl;
-  std::cout<<"camera_extrinsic_to   = "<< cameraTo   <<std::endl;
-  std::cout<<"camera_extrinsic_up   = "<< cameraUp   <<std::endl;
-  //
-  render.getCamera().setupExt(cameraFrom.ptr(),cameraTo.ptr(),cameraUp.ptr());
-  //
-  std::cout<<"----------------------------------"<<std::endl;
-  return true;
-}
-
-bool cmd_renderer_camera_extrinsic_sphere(Console &console)
-{
-  std::cout<<"Set camera extrinsic parameters."<<std::endl;
-  float azimuth;
-  float altitude;
-  float radius;
-  bool status = true;
-  status &= console.getVariable("camera_extrinsic_azimuth", azimuth);
-  status &= console.getVariable("camera_extrinsic_altitude",altitude);
-  status &= console.getVariable("camera_extrinsic_radius",  radius);
-  if(status==false)
-    return false;
-  std::cout<<"camera_extrinsic_azimuth  = "<< azimuth  <<std::endl;
-  std::cout<<"camera_extrinsic_altitude = "<< altitude <<std::endl;
-  std::cout<<"camera_extrinsic_radius   = "<< radius   <<std::endl;
-  //
-  render.getCamera().setupExt(azimuth,altitude,radius);
-  //
-  std::cout<<"----------------------------------"<<std::endl;
-  return true;
-}
-
-bool cmd_renderer_camera_intrinsic(Console &console)
+bool renderer_camera_intrinsic(Console &console,std::vector<std::string> &argv)
 {
   std::cout<<"Set camera intrinsic parameters."<<std::endl;
-  float focus;
-  float zmax;
-  bool status = true;
-  status &= console.getVariable("camera_intrinsic_focus", focus);
-  status &= console.getVariable("camera_intrinsic_zmax",  zmax);
-  if(status==false)
-    return false;
-  std::cout<<"camera_intrinsic_focus  = "<< focus  <<std::endl;
-  std::cout<<"camera_intrinsic_zmax   = "<< zmax <<std::endl;
+  if(argv.size()<2)
+    return Console::meesage_error("Expected focus and zmax.");
+  float focus; Console::string_cast(argv[0],focus);
+  float zmax;  Console::string_cast(argv[1],zmax);
+  if(focus<=0 || zmax<=0)
+    return Console::meesage_error("focus and zmax should be positive.");
   render.getCamera().setupInt(focus,zmax);
   std::cout<<"----------------------------------"<<std::endl;
   return true;
 }
 
-bool cmd_renderer_draw_cube(Console &console)
+bool renderer_draw_cube(Console &console,std::vector<std::string> &argv)
 {
   std::cout<<"Draw a cube."<<std::endl;
-  float ks;
-  bool status = true;
-  status &= console.getVariable("volume_ks",ks);
-  if(status==false)
-    return false;
-  render.drawCube(ks,1,Vector3(1,1,1));
+  if(argv.size()<1)
+    return Console::meesage_error("Expected size.");
+  float size; Console::string_cast(argv[0],size);
+  if(size<=0)
+    return Console::meesage_error("size should be positive.");
+  render.drawCube(size,1,Vector3(1,1,1));
   std::cout<<"----------------------------------"<<std::endl;
   return true;
 }
 
-bool cmd_renderer_draw_axes(Console &console)
+bool renderer_draw_axes(Console &console,std::vector<std::string> &argv)
 {
   std::cout<<"Draw axes."<<std::endl;
-  float ks;
-  bool status = true;
-  status &= console.getVariable("volume_ks",ks);
-  if(status==false)
-    return false;
-  render.drawOrigin(ks*1.5);
+  if(argv.size()<1)
+    return Console::meesage_error("Expected size.");
+  float size; Console::string_cast(argv[0],size);
+  if(size<=0)
+    return Console::meesage_error("size should be positive.");
+  render.drawOrigin(size);
   std::cout<<"----------------------------------"<<std::endl;
   return true;
 }
 
 
-bool cmd_renderer_draw_volume(Console &console)
+bool renderer_draw_volume(Console &console,std::vector<std::string> &argv)
 {
   std::cout<<"Render the volume."<<std::endl;
-  render.drawVolume();
+  if(argv.size()<1)
+    return Console::meesage_error("Expected step.");
+  float step;  Console::string_cast(argv[0],step);
+  if(step<0)
+    return Console::meesage_error("Expected positive steps.");
+  // Draw the volume.
+  Timer timer; timer.start();
+  render.drawVolume(step);
+  std::cout << "Rendering Time: " << timer.duration() << "s."<<std::endl;;
   std::cout<<"----------------------------------"<<std::endl;
   return true;
 }
 
-bool cmd_renderer_save_canvas(Console &console)
+bool renderer_save_canvas(Console &console,std::vector<std::string> &argv)
 {
-  std::cout<<"Save"<<std::endl;
-  
-  std::string filename;
-  bool status = true;
-  status &= console.getVariable("canvas_name",filename);
-  if(status==false)
+  std::cout<<"Save the canvas"<<std::endl;
+  if(argv.size()==0){
+    std::cerr<<"Expected filename."<<std::endl;
     return false;
-  std::cout<<"canvas_name = "<< filename <<std::endl;
-  
+  }
+  std::string filename = argv[0];
+  // Tone mapping is temporarily put here.
   for (unsigned int r = 0; r < render.height; r++){
     for (unsigned int c = 0; c < render.width; c++){
       float *pixel = (float*)render.canvas.ptr(r,c);

@@ -7,14 +7,19 @@
 #include <string>
 #include <map>
 
-bool cmd_generator_init(Console &console)
+bool cmd_generator_init(Console &console,std::vector<std::string> &argv)
 {
+  if(argv.size()<2)
+    return false;
+  std::cout<<"--------- TEST COMMANDS ----------"<<std::endl;
   unsigned int width;
   unsigned int height;
-  console.getVariable("width", width);
-  console.getVariable("height",height);
+  Console::string_cast(argv[0],width);
+  Console::string_cast(argv[1],height);
   std::cout<<"width  = "<<width <<std::endl;
   std::cout<<"height = "<<height<<std::endl;
+  std::cout<<"----------------------------------"<<std::endl;
+  return true;
 }
 
 int main(void)
@@ -29,18 +34,10 @@ int main(void)
   console.show();
   std::cout<<"---------------------"<<std::endl;
   
-  console.eval("name = Zhehang Ding");
-  console.eval(" ");
-  console.eval(" # this is a comment.");
-  console.eval("e-mail = zhehangd@usc.edu  ");
-  console.eval("test = Nessun Dorma. ");
-  console.eval("  bad =  ");
-  console.eval("  bad2=");
-  console.eval(" ");
-  console.eval("shade");
-  console.eval(" name  ");
-  console.eval(" emial  ");
-  console.eval(" e-mail  ");
+  console.eval("name   = Zhehang Ding");
+  console.eval("e-mail = zhehangd@usc.edu");
+  console.eval("email = mydzh@usc.edu");
+  
   std::cout<<"---------------------"<<std::endl;
   
   console.show();
@@ -60,13 +57,19 @@ int main(void)
   
   console.clear();
   
-  std::cout<<"---------------------\n\n\n"<<std::endl;
+  std::cout<<"---------------------"<<std::endl;
   console.addVariable("width","64");
   console.addVariable("height","64");
   console.addCommand("generator_init",cmd_generator_init);
+  
+  std::cout<<console.eval("generator_init 42 abc")<<std::endl;
+  
   console.show();
   
-  console.runfile("test/script-console.script");
+  
+  std::string st = "TEST";
+  std::cout<<(st=="TEST")<<std::endl;
+  std::cout<<(st==st)<<std::endl;
   
   return 0;
 };

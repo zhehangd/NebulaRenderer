@@ -12,89 +12,44 @@ Console::Console(void)
   ignore_unknown = false;
 }
 
-bool Console::addVariable(std::string name,std::string value)
-{
-  auto iter = dict_v.find(name);
-  if ( iter!= dict_v.end() ){
-    meesage_has_existed(name);
-    return false;
-  }
-  dict_v.insert(std::make_pair(name,value));
-  return true;
-}
-
-bool Console::addCommand(std::string name,bool (*f)(Console&))
-{
-  auto iter  = dict_v.find(name);
-  if ( iter != dict_v.end() ){
-    meesage_has_existed(name);
-    return false;
-  }
-  dict_c.insert(std::make_pair(name,f));
-  return true;
-}
-
-void Console::string_trim_blank(std::string &line)
-{
-  const char *blank = " \t\n\r\f\v";
-  line.erase(0, line.find_first_not_of(blank));
-  line.erase(line.find_last_not_of(blank)+1);
-}
-
-void Console::string_trim_comment(std::string &line)
-{
-  size_t pos = line.find_first_of("#");
-  if (pos != std::string::npos)
-    line = line.erase(pos);
-}
-
 // Evaluate one line of string (which should contain only one directive).
 bool Console::eval(std::string line)
 {
   // Trim the string.
   string_trim_blank(  line);
   string_trim_comment(line);
-  
   if (line.empty())
     return true;
   
+  //std::cout<<line<<std::endl;
   
-  std::string name,value;
-  
-  // Variable
+  // Find "=" in the string.
+  // This determines variables/commands.
   size_t eq = line.find_first_of("=");
   if (eq != std::string::npos)
   {
-    
-    name  = line.substr(0,eq); string_trim_blank(name);
-    value = line.substr(eq+1); string_trim_blank(value);
-    auto it = dict_v.find(name);
-    if ( it != dict_v.end() ){
-      it->second = value;
-      meesage_variable(name,value);
-      return true;
-    }
+    // Variable
+    std::string name  = line.substr(0,eq); string_trim_blank(name);
+    std::string value = line.substr(eq+1); string_trim_blank(value); 
+    dv_type::iterator iter;
+    if(find_var(name,iter)==false)
+      return ignore_unknown;
+    iter->second = value;
+    return true;
   }
   else
   {
     // Command
-    name = line;
-    auto it  = dict_c.find(line);
-    if(  it != dict_c.end() )
-      return it->second(*this);
-    else
-    {
-      // Variable Query
-      auto it = dict_v.find(line);
-      if (it != dict_v.end()){
-        meesage_variable(it->first,it->second);
-        return true;
-      }
-    }
+    std::string name;
+    std::vector<std::string> args;
+    string_split(line,name,args);
+    // Search the dictionary.
+    dc_type::iterator iter;
+    if(find_cmd(name,iter)==false)
+      return ignore_unknown;
+    //
+    return iter->second(*this,args);
   }
-  
-  meesage_not_found(name);
-  return ignore_unknown;
 }
 
 // Evaluate lines in a file.
@@ -131,4 +86,87 @@ void Console::input(void)
     std::getline(std::cin,line);
     eval(line);
   }
+}
+
+bool Console::addVariable(std::string name,std::string value)
+{
+  auto iter = dict_v.find(name);
+  if ( iter!= dict_v.end() ){
+    meesage_has_existed(name);
+    return false;
+  }
+  dict_v.insert(std::make_pair(name,value));
+  return true;
+}
+
+bool Console::addCommand(std::string name,cmd_type f)
+{
+  auto iter  = dict_v.find(name);
+  if ( iter != dict_v.end() ){
+    meesage_has_existed(name);
+    return false;
+  }
+  dict_c.insert(std::make_pair(name,f));
+  return true;
+}
+
+void Console::string_trim_blank(std::string &line)
+{
+  const char *blank = " \t\n\r\f\v";
+  line.erase(0, line.find_first_not_of(blank));
+  line.erase(line.find_last_not_of(blank)+1);
+}
+
+void Console::string_trim_comment(std::string &line)
+{
+  size_t pos = line.find_first_of("#");
+  if (pos != std::string::npos)
+    line = line.erase(pos);
+}
+
+
+// Split a string delimited by spaces.
+void Console::string_split(const std::string &line,std::vector<std::string> &slist)
+{
+  slist.clear();
+  std::stringstream ss; ss.str(line);
+  std::string token;
+  while(std::getline(ss,token,' '))
+    if(token.empty()==false)
+      slist.push_back(token);
+}
+
+
+void Console::string_split(const std::string &line,std::string &head,std::vector<std::string> &slist)
+{
+  head.clear();
+  slist.clear();
+  std::stringstream ss; ss.str(line);
+  std::string token;
+  while(std::getline(ss,token,' '))
+    if(token.empty()==false)
+      if(head.empty())
+        head = token;
+      else
+        slist.push_back(token);
+}
+
+bool Console::find_var(const std::string &name,dv_type::iterator &iter)
+{
+  iter = dict_v.find(name);
+  if (iter == dict_v.end()){
+    meesage_not_found(name);
+    return false;
+  }
+  return true;
+}
+
+bool Console::find_cmd(const std::string &name,dc_type::iterator &iter)
+{
+  iter = dict_c.find(name);
+  if (iter == dict_c.end()){
+    meesage_not_found(name);
+    return false;
+  }
+  return true;
 }

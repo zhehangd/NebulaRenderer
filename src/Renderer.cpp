@@ -125,9 +125,8 @@ void Renderer::drawOrigin(float radius)
   }
 }
 
-void Renderer::drawVolume(void)
+void Renderer::drawVolume(float step)
 {
-  float step = 1;
   Vector3 spec[2] = {{1.0f,0.3f,0.6f},{0.2f,0.3f,0.5f}};
   //Vector3 spec[2] = {{1.0f,0.0f,0.0f},{0.0f,0.0f,1.0f}};
 
@@ -216,18 +215,12 @@ void Renderer::drawVolume(void)
   }
 }
 
-void Renderer::computeLightingVolume(Vector3 src,float Ru,float Rv,float att,float step)
+void Renderer::computeLightingVolume(Vector3 src,float Ru,float Rv,float step)
 {
   b_lighting.set(b_material.width,b_material.height,2);
   b_lighting.setKs(b_material.getKs());
   b_lighting.setKv(1.0f);
 
-  std::cout<<"Precomputing the lighting field.\n";
-  std::cout<<"width  = "<<b_material.width<<".\n";
-  std::cout<<"height = "<<b_material.height<<".\n";
-  std::cout<<"Ks = "<<b_material.getKs()<<".\n";
-  std::cout<<"Kv = "<<b_material.getKv()<<".\n";
-  
   int numel = b_lighting.getNumel();
   for(int i=0;i<numel;i++)
   {
@@ -281,15 +274,8 @@ void Renderer::computeLightingVolume(Vector3 src,float Ru,float Rv,float att,flo
 
     for(int k=0;k<2;k++)
       b_lighting.setvalue(uvw[0],uvw[1],uvw[2],energy);
-    
+
     if(i%100==0)
       printf("-------- %4.1f%% -------- \r",100.0f*i/numel);
-    
   }
-}
-
-void Renderer::setVolumeScale(float ks)
-{
-  b_material.setKs(ks);
-  b_lighting.setKs(ks);
 }

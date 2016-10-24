@@ -24,16 +24,39 @@ public:
   Camera& getCamera(void){return camera;}
 
   
+  // Open, access the material volume
   bool setMaterialVolume(const char *filename){return b_material.read(filename);}
   VBF& getMaterialVolume(void){return b_material;}
 
+  // Open, access the lighting volume
   bool setLightingVolume(const char *filename){return b_lighting.read(filename);}
   VBF& getLightingVolume(void){return b_lighting;}
-  // Pre-compute the lighting field from the material volume.
-  void computeLightingVolume(Vector3 src,float Ru,float Rv,float att,float step);
   
-  // Set Ks for all volumes.
-  void setVolumeScale(float ks);
+  // Lighting attributes
+  void setExtinctionEm2Uv(float k){Ke[0]=k;}
+  void setExtinctionEm2Vs(float k){Ke[1]=k;}
+  void setAlbedoEm2Uv(float k){Ke[2]=k;}
+  void setAlbedoEm2Vs(float k){Ke[3]=k;}
+  void setAmbientEm(float k){Ke[4]=k;}
+  void setExtinctionRf2Uv(float k){Kr[0]=k;}
+  void setExtinctionRf2Vs(float k){Kr[1]=k;}
+  void setAlbedoRf2Uv(float k){Kr[2]=k;}
+  void setAlbedoRf2Vs(float k){Kr[3]=k;}
+  void setAmbientRf(float k){Kr[4]=k;}
+  
+  float getExtinctionEm2Uv(void){return Ke[0];}
+  float getExtinctionEm2Vs(void){return Ke[1];}
+  float getAlbedoEm2Uv(void){return Ke[2];}
+  float getAlbedoEm2Vs(void){return Ke[3];}
+  float getAmbientEm(void){return Ke[4];}
+  float getExtinctionRf2Uv(void){return Kr[0];}
+  float getExtinctionRf2Vs(void){return Kr[1];}
+  float getAlbedoRf2Uv(void){return Kr[2];}
+  float getAlbedoRf2Vs(void){return Kr[3];}
+  float getAmbientRf(void){return Kr[4];}
+
+  // Pre-compute the lighting field from the material volume.
+  void computeLightingVolume(Vector3 src,float Ru,float Rv,float step);
 
   // Draw a line.
   void drawLine(Vector3 srt,Vector3 end,Vector3 color);
@@ -42,9 +65,11 @@ public:
   // Draw
   void drawOrigin(float radius);
   
+  
+  
 
   //
-  void drawVolume(void);
+  void drawVolume(float step);
 
   std::uint16_t width;
   std::uint16_t height;
