@@ -10,7 +10,7 @@
 
 using namespace std;
 
-float Perlin3D::interpolate(float a,float b,float x)
+float Perlin3D::interpolate(float a,float b,float x)const
 {
   x = (3*x*x-2*x*x*x);
   return a*(1-x) + b*x;
@@ -24,7 +24,7 @@ void Perlin3D::setseed(int x)
   seed = n;
 }
 
-void Perlin3D::getGradient(int xyz[3],float g[3])
+void Perlin3D::getGradient(int xyz[3],float g[3])const
 {
   uint32_t nx = (xyz[0]<<13) ^ xyz[0];
   uint32_t ny = (xyz[1]<<13) ^ xyz[1];
@@ -46,7 +46,7 @@ void Perlin3D::getGradient(int xyz[3],float g[3])
   g[2] = sin(va);
 }
 
-float Perlin3D::perlin(float x,float y,float z,float stride)
+float Perlin3D::perlin(float x,float y,float z,float stride)const
 {
   float sx = (float) x / stride;
   float sy = (float) y / stride;

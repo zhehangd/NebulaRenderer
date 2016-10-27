@@ -66,7 +66,12 @@ int main(int argc,const char **argv)
   }
   
   for(int i=1;i<argc;i++)
-    console.runfile(argv[i]);
+  {
+    if(std::string(argv[i])=="-e" && (i!=(argc-1)))
+      console.eval(argv[i+1]);
+    else
+      console.runfile(argv[i]);
+  }
   
   return 0;
 }
@@ -307,7 +312,7 @@ bool renderer_save_canvas(Console &console,std::vector<std::string> &argv)
       float *pixel = (float*)render.canvas.ptr(r,c);
       for(int k=0;k<3;k++){
         float v = pixel[k];
-        v = v * 5;
+        v = v * 2;
         v = (exp(3*v)-1)/(exp(3*v)+1);
         pixel[k] = std::fmin(v,1);
       }

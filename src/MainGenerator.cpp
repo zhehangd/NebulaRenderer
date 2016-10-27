@@ -43,6 +43,39 @@ bool generatror_preset_a(Console &console,std::vector<std::string> &argv)
   return true;
 }
 
+bool generatror_preset_b(Console &console,std::vector<std::string> &argv)
+{
+  std::cout<<"Construct the volume with Preset-Test-B."<<std::endl;
+  if(argv.size()<4)
+    return Console::meesage_error("Expected seed, mean, noise, and ratio.");
+  int seed;   Console::string_cast(argv[0],seed);
+  float mean; Console::string_cast(argv[1],mean);
+  float dev;  Console::string_cast(argv[2],dev);
+  float ratio; Console::string_cast(argv[3],ratio);
+  generator.presetTestB(seed,mean,dev,ratio);
+  return true;
+}
+
+bool generatror_preset_c(Console &console,std::vector<std::string> &argv)
+{
+  std::cout<<"Construct the volume with Preset-Test-B."<<std::endl;
+  if(argv.size()<4)
+    return Console::meesage_error("Expected seed, mean, k, and p.");
+  int seed;   Console::string_cast(argv[0],seed);
+  float mean; Console::string_cast(argv[1],mean);
+  float k;    Console::string_cast(argv[2],k);
+  float p ;   Console::string_cast(argv[3],p);
+  generator.presetTestC(seed,mean,k,p);
+  return true;
+}
+
+bool generatror_preset_nebula(Console &console,std::vector<std::string> &argv)
+{
+  std::cout<<"Construct the volume with Preset-Nebula (Under Construction)."<<std::endl;
+  generator.presetNebula();
+  return true;
+}
+
 bool generatror_preview(Console &console,std::vector<std::string> &argv)
 {
   std::cout<<"Save a preview of the material."<<std::endl;
@@ -86,6 +119,9 @@ int main(int argc,const char **argv)
   
   console.addCommand("generator_init",         generatror_init);
   console.addCommand("generator_preset_test_a",generatror_preset_a);
+  console.addCommand("generator_preset_test_b",generatror_preset_b);
+  console.addCommand("generator_preset_test_c",generatror_preset_c);
+  console.addCommand("generatror_preset_nebula",generatror_preset_nebula);
   console.addCommand("generator_preview",      generatror_preview);
   console.addCommand("generator_save",         generatror_save);
   console.addCommand("generator_release",      generatror_release); 
@@ -99,54 +135,14 @@ int main(int argc,const char **argv)
   }
   
   for(int i=1;i<argc;i++)
-    console.runfile(argv[i]);
+  {
+    if(std::string(argv[i])=="-e" && (i!=(argc-1)))
+      console.eval(argv[i+1]);
+    else
+      console.runfile(argv[i]);
+  }
   
   return 0;
-  
-  
-  /*
-  // Create the volume.
-  VBF nebula;
-  nebula.set(size,size,2);
-  
-  // Initialize Perlin3D modules.
-  const int depth = 9;
-  Perlin3D perlin[2][depth] = {};
-  for(int i=0;i<2;i++)
-    for(int j=0;j<depth;j++)
-      perlin[i][j].setseed(j+i*depth+20);
-
-  // For each voxel.
-  for(int i=0;i<nebula.getNumel();i++)
-  {
-    // Compute the coordinates.
-    float xyz[3]; uint16_t uvw[3];
-    nebula.getcoord(i,uvw,xyz);
-    const float x = xyz[0];
-    const float y = xyz[1];
-    const float z = xyz[2];
-    
-    // Compute the noise components.
-    float noise[3] = {};
-    for(int k=0;k<2;k++){
-      for(int d=0;d<depth;d++)
-        noise[k] += perlin[k][d].perlin(x+0.25,y+0.25,z+0.25,0.8f/(1<<d))/(1<<d);
-    }
-    
-    float value[2];
-    // Compute the material density from the noise.
-    for(int k=0;k<2;k++){
-      value[k] = std::pow(noise[k],4) * 3;
-      value[k] = std::fmin(value[k],1.0f);
-    }
-    // Set the values.
-    nebula.setvalue(uvw[0],uvw[1],uvw[2],value);
-    
-    // Report.
-    if(i%100==0)
-      printf("-------- %4.1f%% -------- \r",100.0f*i/nebula.getNumel());
-  }*/
-
   
 }
 

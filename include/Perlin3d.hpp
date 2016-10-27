@@ -33,15 +33,15 @@ public:
   void nextseed(void){seed *= 3346547543;}
   
   // Query the noise value given position and frequency.
-  float perlin(float x,float y,float z,float stride);
+  float perlin(float x,float y,float z,float stride)const;
 
 private:
   
   // Smooth interpolation function.
-  float interpolate(float a,float b,float x);
+  float interpolate(float a,float b,float x)const;
   
   // Query the gradiant at a integer position.
-  void getGradient(int xyz[3],float g[3]);
+  void getGradient(int xyz[3],float g[3])const;
   
   // Seed.
   std::uint32_t seed;

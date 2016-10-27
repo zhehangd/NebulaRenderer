@@ -219,7 +219,7 @@ void Renderer::computeLightingVolume(Vector3 src,float Ru,float Rv,float step)
 {
   b_lighting.set(b_material.width,b_material.height,2);
   b_lighting.setKs(b_material.getKs());
-  b_lighting.setKv(1.0f);
+  b_lighting.setKv(3.0f);
 
   int numel = b_lighting.getNumel();
   for(int i=0;i<numel;i++)
@@ -268,9 +268,9 @@ void Renderer::computeLightingVolume(Vector3 src,float Ru,float Rv,float step)
         energy[k] = energy[k] * std::exp(-DaExt[k]*fstep);
     }
 
-    //float ir = 0.1 * b_lighting.getKs() / (dist + b_lighting.getKs()/10);
-    //for(int k=0;k<2;k++)
-    //  energy[k] = energy[k] * ir;
+    float ir = b_lighting.getKs() / (dist + b_lighting.getKs()/10);
+    for(int k=0;k<2;k++)
+      energy[k] = energy[k] * ir;
 
     for(int k=0;k<2;k++)
       b_lighting.setvalue(uvw[0],uvw[1],uvw[2],energy);
