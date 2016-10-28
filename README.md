@@ -5,6 +5,10 @@ There are two programs in this project. One generates a material volume of nebul
 
 ## Usage
 make
+
 ./ngen config-generation
+
 ./nren config-lighting
+
 ./nren config-rendering
+
