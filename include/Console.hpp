@@ -34,6 +34,9 @@ public:
   bool getVariable(std::string name,T *dst,int len,char del=',');
   template<class T>
   bool getVariable(std::string name,T &dst);
+  
+  
+  
 
   
   // Interactive mode.
@@ -46,6 +49,8 @@ public:
   void show(void);
   
   bool ignore_unknown;
+  //
+  bool verbose;
   //bool silent;
   
   // Convert a string to a sequence of values of the given type.
@@ -55,7 +60,10 @@ public:
   template<class T> 
   static bool string_cast(std::string input,T *dst,int len,char del=',');
   
-  static bool meesage_error(std::string message){std::cerr<<"[Error]"<<message<<std::endl;return false;}
+  // Print an error message and return false;
+  bool message_error(std::string message);
+  // Print a status message and return true;
+  bool message_status(std::string message);
   
 //private:
   // Remove the blank characters in the beginning and the end of the string.
@@ -67,10 +75,10 @@ public:
   static void string_split(const std::string &line,std::string &head,std::vector<std::string> &slist);
   
   // Print out messages.
-  static void meesage_not_found(std::string key){std::cerr<<"\""<<key<<"\" not found."<<std::endl;}
-  static void meesage_has_existed(std::string key){std::cerr<<"\""<<key<<"\" has existed."<<std::endl;}
-  static void meesage_variable(std::string name,std::string value){std::cout<<name<<" = \""<<value<<"\""<<std::endl;}
-  static void meesage_command(std::string name){std::cout<<name<<std::endl;}
+  static void message_not_found(std::string key){std::cerr<<"\""<<key<<"\" not found."<<std::endl;}
+  static void message_has_existed(std::string key){std::cerr<<"\""<<key<<"\" has existed."<<std::endl;}
+  static void message_variable(std::string name,std::string value){std::cout<<name<<" = \""<<value<<"\""<<std::endl;}
+  static void message_command(std::string name){std::cout<<name<<std::endl;}
 
   bool find_var(const std::string &name,dv_type::iterator &iter);
   bool find_cmd(const std::string &name,dc_type::iterator &iter);

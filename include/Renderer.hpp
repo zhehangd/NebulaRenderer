@@ -2,11 +2,25 @@
 #define RENDERER_H_
 
 #include <cstdint>
-
+#include <vector>
 #include "Camera.hpp"
 #include "Image.hpp"
 #include "Math.hpp"
 #include "VBF.hpp"
+
+// A light source is parametrized by five values.
+// Three coordinates specify the position of the light.
+// [ru] and [rv] specify the brightness in ultraviolet
+// and visible bands respectively.
+class Light
+{
+public:
+  Light(Vector3 p,float u,float v):pos(p),ru(u),rv(v){}
+  
+  Vector3 pos;
+  float ru;
+  float rv;
+};
 
 class Renderer
 {
@@ -17,13 +31,15 @@ public:
   // Specify the dimension of the canvas.
   // Execute this as an initialization.
   void setCanvas(int width,int height);
+
+  // Initialize the canvas and depth buffer with the given values.
+  void cleanCanvas(Vector3 color,float d);
   
   // Replace the camera configuration by the given one.
   void setCamera(const Camera &cam){camera=cam;}
   // Get the reference of the current camera.
   Camera& getCamera(void){return camera;}
 
-  
   // Open, access the material volume
   bool setMaterialVolume(const char *filename){return b_material.read(filename);}
   VBF& getMaterialVolume(void){return b_material;}
@@ -31,6 +47,10 @@ public:
   // Open, access the lighting volume
   bool setLightingVolume(const char *filename){return b_lighting.read(filename);}
   VBF& getLightingVolume(void){return b_lighting;}
+  
+  // Set color of the two kinds of nebula.
+  void setSpectrumEmission(Vector3 color){specEmission=color;}
+  void setSpectrumReflection(Vector3 color){specReflection=color;}
   
   // Lighting attributes
   void setExtinctionEm2Uv(float k){Ke[0]=k;}
@@ -56,7 +76,7 @@ public:
   float getAmbientRf(void){return Kr[4];}
 
   // Pre-compute the lighting field from the material volume.
-  void computeLightingVolume(Vector3 src,float Ru,float Rv,float step);
+  void computeLightingVolume(const std::vector<Light> &lightList,float step);
 
   // Draw a line.
   void drawLine(Vector3 srt,Vector3 end,Vector3 color);
@@ -64,9 +84,6 @@ public:
   void drawCube(float radius,int tick,Vector3 color);
   // Draw
   void drawOrigin(float radius);
-  
-  
-  
 
   //
   void drawVolume(float step);
@@ -96,6 +113,10 @@ public:
   // [4]: ambient radiance.
   float Ke[5];
   float Kr[5];
+  
+  // Spectrum
+  Vector3 specEmission;
+  Vector3 specReflection;
   
 private:
   

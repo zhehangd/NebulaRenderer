@@ -1,5 +1,5 @@
 
 renderer_open_material    material.vbf
-renderer_compute_lighting 0,0,0 1,1 1
+renderer_compute_lighting 1 0,0,0,1.0,1.0
 renderer_save_lighting    lighting.vbf
 renderer_preview_lighting preview-l.ppm 6

@@ -9,7 +9,25 @@
 
 Console::Console(void)
 {
+  verbose = false;
   ignore_unknown = false;
+}
+
+
+// Print an error message and return false;
+bool Console::message_error(std::string message)
+{
+  std::cerr<<"[Error]"<<message<<std::endl;
+  return false;
+  
+}
+// Print a status message and return true;
+bool Console::message_status(std::string message)
+{
+  if (verbose == true)
+    std::clog<<"[Status]"<<message<<std::endl;
+  return true;
+  
 }
 
 // Evaluate one line of string (which should contain only one directive).
@@ -72,9 +90,9 @@ void Console::runfile(const char *filename)
 void Console::show(void)
 {
   for(auto it : dict_v)
-    meesage_variable(it.first,it.second);
+    message_variable(it.first,it.second);
   for(auto it : dict_c)
-    meesage_command(it.first);
+    message_command(it.first);
 }
 
 void Console::input(void)
@@ -92,7 +110,7 @@ bool Console::addVariable(std::string name,std::string value)
 {
   auto iter = dict_v.find(name);
   if ( iter!= dict_v.end() ){
-    meesage_has_existed(name);
+    message_has_existed(name);
     return false;
   }
   dict_v.insert(std::make_pair(name,value));
@@ -103,7 +121,7 @@ bool Console::addCommand(std::string name,cmd_type f)
 {
   auto iter  = dict_v.find(name);
   if ( iter != dict_v.end() ){
-    meesage_has_existed(name);
+    message_has_existed(name);
     return false;
   }
   dict_c.insert(std::make_pair(name,f));
@@ -155,7 +173,7 @@ bool Console::find_var(const std::string &name,dv_type::iterator &iter)
 {
   iter = dict_v.find(name);
   if (iter == dict_v.end()){
-    meesage_not_found(name);
+    message_not_found(name);
     return false;
   }
   return true;
@@ -165,7 +183,7 @@ bool Console::find_cmd(const std::string &name,dc_type::iterator &iter)
 {
   iter = dict_c.find(name);
   if (iter == dict_c.end()){
-    meesage_not_found(name);
+    message_not_found(name);
     return false;
   }
   return true;

@@ -22,8 +22,8 @@ nren  : Image.o Camera.o Primitive.o Math.o VBF.o Perlin3d.o Renderer.o Utility.
 	$(CXX) -o $@  $^
 	
 
-MainRenderer.o :   Image.hpp Camera.hpp Primitive.hpp Math.hpp VBF.hpp Perlin3d.hpp Renderer.hpp
-MainGenerator.o : Image.hpp Math.hpp VBF.hpp Perlin3d.hpp
+MainRenderer.o :   Image.hpp Camera.hpp Primitive.hpp Math.hpp VBF.hpp Perlin3d.hpp Console.hpp Renderer.hpp
+MainGenerator.o : Image.hpp Math.hpp VBF.hpp Perlin3d.hpp Console.hpp
 Renderer.o:  Image.hpp Camera.hpp Primitive.hpp Math.hpp VBF.hpp Renderer.hpp 
 Utility.o: Math.hpp
 Generator.o: Math.hpp VBF.hpp Perlin3d.hpp
