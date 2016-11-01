@@ -220,8 +220,10 @@ Image imconvert(const Image& src,PixType elen);
 Image imconvert(const ImFloat& src,PixType elen);
 ImFloat imconvert2float(const Image& src);
 
-void imwrite(const ImFloat &image,const char* filename);
-void imwrite(const Image &image,const char* filename);
+bool imwrite(const ImFloat &image,const char* filename);
+bool imwrite(const Image &image,const char* filename);
+bool imread(const char* filename, Image &image);
+
 
 void iminfo(ImageStruct &image);
 

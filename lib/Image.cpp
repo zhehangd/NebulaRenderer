@@ -364,15 +364,15 @@ Image imconvert(const Image& src,PixType elen)
   return dst;
 }
 
-void imwrite(const ImFloat &image,const char* filename)
+bool imwrite(const ImFloat &image,const char* filename)
 {
-  imwrite(imconvert(image*255,1),filename); 
+  return imwrite(imconvert(image*255,1),filename); 
 }
 
-void imwrite(const Image &image,const char* filename)
+bool imwrite(const Image &image,const char* filename)
 {
   if (image.channel!=1 && image.channel!=3)
-    return;
+    return false;
   
   Image output = imconvert(image,1);
   std::ostringstream ss;
@@ -391,6 +391,67 @@ void imwrite(const Image &image,const char* filename)
     file.write((char*)output.ptr(i,0),output.cdx*output.width);
   
   file.close();
+  return true;
+}
+
+bool imread(const char* filename, Image &image)
+{
+  // Assume the following format.
+  // ----------------------------
+  // [P5] or [P6].
+  // # One or more possible comments.
+  // [Width] [Height] [MAX]
+  // [Raster]
+  // ----------------------------
+  int width,height,vmax,ch;
+
+  std::ifstream file;
+  file.open(filename,std::istream::binary);
+  if(file.is_open()==false)
+    return false;
+
+  // The first char should be 'P'.
+  if(file.get()!='P')
+    return false;
+  // Read the format and parse the number of channel.
+  // Only P5 and P6 are supported.
+  ch = file.get();
+  ch = (ch=='6')?3:((ch=='5')?1:0);
+  if(ch==0)
+    return false;
+  if (std::isspace(file.get())==false)
+    return false;
+
+  // Skip spaces and comments.
+  while(std::isspace(file.peek()))
+    file.ignore();
+  while( file.peek() == '#' ){
+    char c = file.get();
+    while( c!='\n' && c!='\r' )
+      c = file.get();
+  }
+  
+  
+  file >> width >> height >> vmax;
+  
+  if (std::isspace(file.get())==false)
+    return false;
+  
+  // Create the image.
+  if(width<=0 || height<=0 || vmax<=0)
+    return false;
+
+  Image input(width,height,ch,1);
+  
+  cout<<width<<" "<<width<<" "<<height<<" "<<input.cdx<<endl;
+  
+  file.read((char*)input.ptr(0,0),width*height*input.cdx);
+  if(file.eof()==true || file.good()==false)
+    return false;
+  file.close();
+  
+  image = input;
+  return true;
 }
 
 void iminfo(ImageStruct &image)

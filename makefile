@@ -26,7 +26,7 @@ MainRenderer.o :   Image.hpp Camera.hpp Primitive.hpp Math.hpp VBF.hpp Perlin3d.
 MainGenerator.o : Image.hpp Math.hpp VBF.hpp Perlin3d.hpp Console.hpp
 Renderer.o:  Image.hpp Camera.hpp Primitive.hpp Math.hpp VBF.hpp Renderer.hpp 
 Utility.o: Math.hpp
-Generator.o: Math.hpp VBF.hpp Perlin3d.hpp
+Generator.o: Math.hpp VBF.hpp Image.hpp Perlin3d.hpp
 
 mt-vbf: Image.o VBF.o mt-vbf.o
 	$(CXX) -o $@  $^

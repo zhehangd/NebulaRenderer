@@ -113,11 +113,11 @@ int main(int argc,const char **argv)
   Console console;
   console.ignore_unknown = true;
   
-  console.addCommand("generator_init",         generatror_init);
-  console.addCommand("generator_preset_test_a",generatror_preset_a);
-  console.addCommand("generator_preset_test_b",generatror_preset_b);
-  console.addCommand("generator_preset_test_c",generatror_preset_c);
-  console.addCommand("generatror_preset_nebula",generatror_preset_nebula);
+  console.addCommand("generator_init",             generatror_init);
+  console.addCommand("generator_preset_test_a"    ,generatror_preset_a);
+  console.addCommand("generator_preset_test_b"    ,generatror_preset_b);
+  console.addCommand("generator_preset_test_c"    ,generatror_preset_c);
+  console.addCommand("generatror_preset_nebula"   ,generatror_preset_nebula);
   console.addCommand("generator_preview",      generatror_preview);
   console.addCommand("generator_save",         generatror_save);
   console.addCommand("generator_release",      generatror_release); 

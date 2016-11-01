@@ -4,7 +4,7 @@
 #include "VBF.hpp"
 #include "Math.hpp"
 #include "Perlin3d.hpp"
-
+#include "Image.hpp"
 // Nebula Generator.
 class Generator
 {
@@ -18,7 +18,6 @@ public:
   void presetTestA(void);
   void presetTestB(int seed,float m,float dev,float rat);
   void presetTestC(int seed,float m,float k,float p);
-  
   void presetNebula(void);
   
   void blast(Vector3 src);

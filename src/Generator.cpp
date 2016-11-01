@@ -1,4 +1,5 @@
 #include "Generator.hpp"
+#include "Image.hpp"
 #include "Math.hpp"
 
 #include <iostream>
@@ -157,6 +158,7 @@ void Generator::presetTestC(int seed,float m,float k,float p)
   
 }
 
+
 // Generate nebula.
 // Currently the parameters are hard coded.
 void Generator::presetNebula(void)
@@ -179,9 +181,6 @@ void Generator::presetNebula(void)
   for(int i=0;i<pch;i++)
     for(int j=0;j<depth;j++)
       perlin[i][j].setseed(j+i*depth+seed);
-    
-    
-  
 
   //
   // For each voxel.

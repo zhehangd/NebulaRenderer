@@ -32,6 +32,7 @@ bool renderer_draw_cube(Console &console,std::vector<std::string> &argv);
 bool renderer_draw_axes(Console &console,std::vector<std::string> &argv);
 bool renderer_draw_volume(Console &console,std::vector<std::string> &argv);
 bool renderer_save_canvas(Console &console,std::vector<std::string> &argv);
+bool renderer_set_spectrum(Console &console,std::vector<std::string> &argv);
 
 
 int main(int argc,const char **argv)
@@ -48,6 +49,9 @@ int main(int argc,const char **argv)
   console.addCommand("renderer_save_lighting",   renderer_save_lighting);
   console.addCommand("renderer_preview_material",renderer_preview_material);
   console.addCommand("renderer_preview_lighting",renderer_preview_lighting);
+  
+  
+  console.addCommand("renderer_set_spectrum",     renderer_set_spectrum);
   
   console.addCommand("renderer_camera_extrinsic", renderer_camera_extrinsic);
   console.addCommand("renderer_camera_intrinsic",   renderer_camera_intrinsic);
@@ -298,5 +302,18 @@ bool renderer_save_canvas(Console &console,std::vector<std::string> &argv)
     }
   }
   imwrite(render.canvas,filename.c_str());
+  return true;
+}
+
+bool renderer_set_spectrum(Console &console,std::vector<std::string> &argv)
+{
+  console.message_status("Set spectrum");
+  if(argv.size()<2)
+    return console.message_error("Expected two spectrum vectors");
+  
+  Vector3 emission;   Console::string_cast(argv[0],emission.ptr(),3);
+  Vector3 reflection; Console::string_cast(argv[1],reflection.ptr(),3);
+  render.setSpectrumEmission(emission);
+  render.setSpectrumReflection(reflection);
   return true;
 }
