@@ -15,10 +15,9 @@ public:
   
   void presetUniform(float m1,float m2);
   
-  void presetTestA(void);
-  void presetTestB(int seed,float m,float dev,float rat);
-  void presetTestC(int seed,float m,float k,float p);
+  void presetTest(void);
   void presetNebula(void);
+  void presetJulia(void);
   
   void blast(Vector3 src);
   

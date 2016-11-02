@@ -31,37 +31,11 @@ bool generatror_init(Console &console,std::vector<std::string> &argv)
   return true;
 }
 
-bool generatror_preset_a(Console &console,std::vector<std::string> &argv)
+bool generatror_preset_test(Console &console,std::vector<std::string> &argv)
 {
   console.message_status("Construct the volume with Preset-Test-A.");
-  generator.presetTestA();
+  generator.presetTest();
   
-  return true;
-}
-
-bool generatror_preset_b(Console &console,std::vector<std::string> &argv)
-{
-  console.message_status("Construct the volume with Preset-Test-B.");
-  if(argv.size()<4)
-    return console.message_error("Expected seed, mean, noise, and ratio.");
-  int seed;   Console::string_cast(argv[0],seed);
-  float mean; Console::string_cast(argv[1],mean);
-  float dev;  Console::string_cast(argv[2],dev);
-  float ratio; Console::string_cast(argv[3],ratio);
-  generator.presetTestB(seed,mean,dev,ratio);
-  return true;
-}
-
-bool generatror_preset_c(Console &console,std::vector<std::string> &argv)
-{
-  console.message_status("Construct the volume with Preset-Test-B.");
-  if(argv.size()<4)
-    return console.message_error("Expected seed, mean, k, and p.");
-  int seed;   Console::string_cast(argv[0],seed);
-  float mean; Console::string_cast(argv[1],mean);
-  float k;    Console::string_cast(argv[2],k);
-  float p ;   Console::string_cast(argv[3],p);
-  generator.presetTestC(seed,mean,k,p);
   return true;
 }
 
@@ -69,6 +43,13 @@ bool generatror_preset_nebula(Console &console,std::vector<std::string> &argv)
 {
   console.message_status("Construct the volume with Preset-Nebula (Under Construction).");
   generator.presetNebula();
+  return true;
+}
+
+bool generatror_preset_julia(Console &console,std::vector<std::string> &argv)
+{
+  console.message_status("Construct the volume with Preset-Julia (Under Construction).");
+  generator.presetJulia();
   return true;
 }
 
@@ -114,10 +95,9 @@ int main(int argc,const char **argv)
   console.ignore_unknown = true;
   
   console.addCommand("generator_init",             generatror_init);
-  console.addCommand("generator_preset_test_a"    ,generatror_preset_a);
-  console.addCommand("generator_preset_test_b"    ,generatror_preset_b);
-  console.addCommand("generator_preset_test_c"    ,generatror_preset_c);
+  console.addCommand("generator_preset_test"    ,generatror_preset_test);
   console.addCommand("generatror_preset_nebula"   ,generatror_preset_nebula);
+  console.addCommand("generatror_preset_julia"    ,generatror_preset_julia);
   console.addCommand("generator_preview",      generatror_preview);
   console.addCommand("generator_save",         generatror_save);
   console.addCommand("generator_release",      generatror_release); 

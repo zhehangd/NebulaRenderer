@@ -1,5 +1,7 @@
 
 renderer_open_material    material.vbf
+renderer_setup_extinct Emission   0.04,0.04,1,0,0
+renderer_setup_extinct Reflection 0.04,0.04,0,1,0
 renderer_compute_lighting 1 0,0,0,1.0,1.0
 renderer_save_lighting    lighting.vbf
 renderer_preview_lighting preview-l.ppm 6

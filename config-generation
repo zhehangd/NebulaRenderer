@@ -1,9 +1,7 @@
 # Initialize the generator.
 generator_init 64 64 100 1
 # Generate a test volume.
-#generator_preset_test_a
-#generator_preset_test_b 20 0 0.3 1.0
-#generator_preset_test_c 20 -0.1 0.1 2
+#generator_preset_test
 generatror_preset_nebula
 # Show preview.
 generator_preview preview-m.ppm 6

@@ -24,7 +24,7 @@ const int IMAGE_S32 = 4;
 const int IMAGE_F32 = 4;
 
 
-// This is a type-independent abstract of an ImageStruct.
+// This is a type-independent abstract of an image.
 class ImageStruct
 {
 public:  
@@ -60,6 +60,9 @@ public:
   
   
   // ------------------- Data Accessing -------------------
+  
+  // Test a coordinate.
+  bool test(PixCoord r,PixCoord c,PixCoord ch=0){return r>=0 && r<height && c>=0 && c<width && ch>=0 && ch<channel;}
   
   // Obtain the one dimensional index of a pixel.
   PixCoord index(PixCoord r,PixCoord c,PixCoord ch=0)const{return r*cdy+c*cdx+ch*elength;}

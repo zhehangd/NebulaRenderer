@@ -90,3 +90,12 @@ Quaternion Quaternion::operator*(const Quaternion &src)const
     return (Quaternion(*this)*=src);
 }
 
+
+std::ostream& operator<<(std::ostream& ss,const Vector3 &v)
+{
+  auto prec = ss.precision(2);
+  ss<<"("<<v[0]<<","<<v[1]<<","<<v[2]<<")";
+  ss.precision(prec);
+  return ss;
+}
+

@@ -7,7 +7,8 @@
 #define MATH_H_
 
 #include <cmath>
-   
+#include <iostream>
+
 class Vector3
 {
 public:
@@ -75,6 +76,8 @@ Vector3 normalize(const Vector3& v);
 // Dot multiplication.
 float dot(const Vector3 &v1,const Vector3 &v2);
 
+std::ostream& operator<<(std::ostream& ss,const Vector3 &v);
+
 struct Vector4
 {
     Vector4(void){v[0]=v[1]=v[2]=v[3]=0;}
@@ -117,19 +120,20 @@ class Matrix4x4
 
 class Quaternion
 {
-    public:
-        Quaternion(void):a(0),i(0),j(0),k(0){}
-        Quaternion(float a,float i,float j,float k):a(a),i(i),j(j),k(k){}
-        
-        Quaternion& operator+=(const Quaternion &src);
-        Quaternion& operator*=(const Quaternion &src);
-        
-        Quaternion operator+(const Quaternion &src)const;
-        Quaternion operator*(const Quaternion &src)const;
-        
-        float norm1(){return std::fabs(a)+std::fabs(i)+std::fabs(j)+std::fabs(k);};
-        
-        float a,i,j,k;
+  public:
+    Quaternion(void):a(0),i(0),j(0),k(0){}
+    Quaternion(float a,float i,float j,float k):a(a),i(i),j(j),k(k){}
+    
+    Quaternion& operator+=(const Quaternion &src);
+    Quaternion& operator*=(const Quaternion &src);
+    Quaternion& operator*=(float v){a*=v;i*=v;j*=v;k*=v;}
+    
+    Quaternion operator+(const Quaternion &src)const;
+    Quaternion operator*(const Quaternion &src)const;
+    
+    float norm1(){return std::fabs(a)+std::fabs(i)+std::fabs(j)+std::fabs(k);};
+    
+    float a,i,j,k;
 };
 
 

@@ -14,6 +14,7 @@ VPATH    = include lib src test
 .PHONY: clean
 
 ALL   : ngen nren
+test  : draw-star triangle
 
 ngen  : Image.o Math.o VBF.o Perlin3d.o Utility.o Generator.o Console.o MainGenerator.o
 	$(CXX) -o $@  $^
@@ -25,16 +26,16 @@ nren  : Image.o Camera.o Primitive.o Math.o VBF.o Perlin3d.o Renderer.o Utility.
 MainRenderer.o :   Image.hpp Camera.hpp Primitive.hpp Math.hpp VBF.hpp Perlin3d.hpp Console.hpp Renderer.hpp
 MainGenerator.o : Image.hpp Math.hpp VBF.hpp Perlin3d.hpp Console.hpp
 Renderer.o:  Image.hpp Camera.hpp Primitive.hpp Math.hpp VBF.hpp Renderer.hpp 
-Utility.o: Math.hpp
 Generator.o: Math.hpp VBF.hpp Image.hpp Perlin3d.hpp
 
-mt-vbf: Image.o VBF.o mt-vbf.o
+draw-star: Image.o draw-star.o
 	$(CXX) -o $@  $^
-mt-console: Console.o mt-console.o
+triangle: Image.o Camera.o Primitive.o Math.o triangle.o
 	$(CXX) -o $@  $^
 
-mt-vbf.o: Image.hpp VBF.hpp
-mt-console.o : Console.hpp
+draw-star.o: Image.hpp
+triangle.o:  Image.hpp Camera.hpp Primitive.hpp Math.hpp
+
 clean:
 	@echo clean
-	rm *.o *~ ngen nren mt-vbf mt-console
+	rm *.o *~ ngen nren draw-star triangle

@@ -113,16 +113,16 @@ bool VBF::checkuvw(const float *uvw)const
 
 bool VBF::checkuvw(std::uint16_t u,std::uint16_t v,std::uint16_t w)const
 {
-  return    u>=0 && u<(width-1)
-         && v>=0 && v<(height-1)
-         && w>=0 && w<(width-1);
+  return    u>=0 && u<=(width-1)
+         && v>=0 && v<=(height-1)
+         && w>=0 && w<=(width-1);
 }
 
 bool VBF::checkuvw(float u,float v,float w)const
 {
-  return    u>=0 && u<(width-1)
-         && v>=0 && v<(height-1)
-         && w>=0 && w<(width-1);
+  return    u>=0 && u<=(width-1)
+         && v>=0 && v<=(height-1)
+         && w>=0 && w<=(width-1);
 }
 
 bool VBF::query(const float *xyz,float *dst)const
