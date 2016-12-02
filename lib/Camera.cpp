@@ -122,8 +122,9 @@ void Camera::setupExt(const float *src,float h,float v)
 
 void Camera::setupInt(float focus,float zmax)
 {
+  zm = zmax;
   f  = focus;
-  fz = -(zmax+focus)/(zmax + 1e-6);
+  fz = (zmax+focus)/(zmax + 1e-6);
 }
 
 void Camera::setupScn(float w,float h,bool align_h)
@@ -134,33 +135,33 @@ void Camera::setupScn(float w,float h,bool align_h)
 }
 
 
-void Camera::projectXsw(float *dst,float *src)
+void Camera::projectXsw(float *dst,float *src)const
 {
   projectXcw(dst,src);
   projectXpc(dst,dst);
   projectXsp(dst,dst);
 }
 
-void Camera::projectInvXsw(float *dst,float *src)
+void Camera::projectInvXsw(float *dst,float *src)const
 {
   projectInvXsp(dst,src);
   projectInvXpc(dst,dst);
   projectInvXcw(dst,dst);
 }
 
-void Camera::projectXsc(float *dst,float *src)
+void Camera::projectXsc(float *dst,float *src)const
 {
   projectXpc(dst,dst);
   projectXsp(dst,dst);
 }
 
-void Camera::projectInvXsc(float *dst,float *src)
+void Camera::projectInvXsc(float *dst,float *src)const
 {
   projectInvXsp(dst,src);
   projectInvXpc(dst,dst);
 }
 
-void Camera::projectXcw(float *dst,float *src)
+void Camera::projectXcw(float *dst,float *src)const
 {
   float s4[] = {src[0],src[1],src[2],1};
   float d4[] = {}; VecMultMatrix(d4,Xcw,s4);
@@ -168,21 +169,21 @@ void Camera::projectXcw(float *dst,float *src)
     dst[i] = d4[i];
 }
 
-void Camera::projectXpc(float *dst,float *src)
+void Camera::projectXpc(float *dst,float *src)const
 {
   float w = f - src[2];
   dst[0]  = f  * src[0] / w;
   dst[1]  = f  * src[1] / w;
-  dst[2]  = fz * src[2] / w;
+  dst[2]  =-fz * src[2] / w;
 }
 
-void Camera::projectXsp(float *dst,float *src)
+void Camera::projectXsp(float *dst,float *src)const
 {
   dst[0] =   src[0] * fs + hw;
   dst[1] = - src[1] * fs + hh;
 }
 
-void Camera::projectInvXcw(float *dst,float *src)
+void Camera::projectInvXcw(float *dst,float *src)const
 {
   float s4[] = {src[0],src[1],src[2],1};
   float d4[] = {}; VecMultMatrix(d4,iXcw,s4);
@@ -190,15 +191,15 @@ void Camera::projectInvXcw(float *dst,float *src)
     dst[i] = d4[i];
 }
 
-void Camera::projectInvXpc(float *dst,float *src)
+void Camera::projectInvXpc(float *dst,float *src)const
 {
-  dst[2] = src[2] * f / (fz + src[2]);
+  dst[2] = src[2] * f / (-fz + src[2]);
   float w = f - dst[2];
   dst[0] = src[0] * w / f;
   dst[1] = src[1] * w / f;
 }
 
-void Camera::projectInvXsp(float *dst,float *src)
+void Camera::projectInvXsp(float *dst,float *src)const
 {
   dst[0] =   (src[0] - hw) / fs;
   dst[1] = - (src[1] - hh) / fs;

@@ -4,6 +4,7 @@
 #include "Math.hpp"
 
 #include <iostream>
+#include <iomanip>
 #include <cmath>
 #include <algorithm>
 #include <vector>
@@ -32,22 +33,122 @@ struct Global
   
 }global;
 
-void drawTriangle(Triangle &tri)
+void drawTriangle(Triangle &tri);
+vector<Triangle> checkTriangleAtCameraSpace(Triangle &tri);
+
+
+void putTriangle(Triangle &tri)
 {
-  // Project to the camera space.
+  
   for(int i=0;i<3;i++)
     global.camera.projectXcw(tri.vertex[i].ptr(),tri.vertex[i].ptr());
-  // =================
-  // If some vertices are behind the camera,
-  //   we need to find a way to get only the visible part.
-  //   this involves splitting the triangle into several subtriangles.
-  //   .....
-  // =================
-  // Here we just ignore this problem.
+
+  vector<Triangle> tris_to_be_drawn = checkTriangleAtCameraSpace(tri);
   
-  for(int i=0;i<3;i++)
-    global.camera.projectXsc(tri.vertex[i].ptr(),tri.vertex[i].ptr());
-  
+  for(int i=0;i<tris_to_be_drawn.size();i++)
+  {
+    std::cout<<"TRI-"<<i<<std::endl;
+    std::cout<<"Vcam-0   "<<tri.vertex[0]<<std::endl;
+    std::cout<<"Vcam-1   "<<tri.vertex[1]<<std::endl;
+    std::cout<<"Vcam-2   "<<tri.vertex[2]<<std::endl;
+    std::cout<<"UV-0       "<<tri.uv[0]<<std::endl;
+    std::cout<<"UV-1       "<<tri.uv[1]<<std::endl;
+    std::cout<<"UV-2       "<<tri.uv[2]<<std::endl;
+    for(int j=0;j<3;j++)
+      global.camera.projectXsc(tris_to_be_drawn[i].vertex[j].ptr(),tris_to_be_drawn[i].vertex[j].ptr());
+    
+    std::cout<<"Vscr-0   "<<tri.vertex[0]<<std::endl;
+    std::cout<<"Vscr-1   "<<tri.vertex[1]<<std::endl;
+    std::cout<<"Vscr-2   "<<tri.vertex[2]<<std::endl;
+    std::cout<<"UV-0       "<<tri.uv[0]<<std::endl;
+    std::cout<<"UV-1       "<<tri.uv[1]<<std::endl;
+    std::cout<<"UV-2       "<<tri.uv[2]<<std::endl;
+    
+    drawTriangle(tris_to_be_drawn[i]);
+  }
+}
+
+Vector3 getZIntersect(const Vector3 &start, const Vector3 &end) {
+  Vector3 slope = start - end;
+  float t = - start[2]/slope[2];
+  Vector3 result;
+  result[2] = 0;
+  result[0] = start[0] + slope[0] * t;
+  result[1] = start[1] + slope[1] * t;
+  return result;
+}
+
+vector<Triangle> checkTriangleAtCameraSpace(Triangle &tri) {
+  vector<Triangle> tris_to_be_drawn;
+
+  // Check if the vertices are behind camera
+  std::cout<<"Checking the number of vertices behind the camera: ";
+  int num_vertices_behind = 0;
+  vector<int> indices_behind;
+  vector<int> indices_front;
+  for (int i = 0; i < 3; i++) {
+    if (tri.vertex[i][2] > 0) {
+      num_vertices_behind++;
+      indices_behind.emplace_back(i);
+    }
+    else {
+      indices_front.emplace_back(i);
+    }
+  }
+  std::cout << num_vertices_behind << std::endl;
+
+  // For UV and z interpolation
+  Vector3 uvz[3];
+  for (int i = 0; i < 3; i++) {
+    uvz[i]    = tri.uv[i];
+    uvz[i][2] = tri.vertex[i][2];
+  }
+
+
+  if (num_vertices_behind == 0) {
+    tris_to_be_drawn.emplace_back(tri);
+  }
+  else if (num_vertices_behind == 1) {
+    Vector3 vertex_intersect0 = getZIntersect(tri.vertex[indices_behind[0]],
+                                              tri.vertex[indices_front[0]]);
+    Vector3 vertex_intersect1 = getZIntersect(tri.vertex[indices_behind[0]],
+                                              tri.vertex[indices_front[1]]);
+    // UV interpolation
+    Vector3 uv_intersect0 = getZIntersect(uvz[indices_behind[0]], uvz[indices_front[0]]);
+    Vector3 uv_intersect1 = getZIntersect(uvz[indices_behind[0]], uvz[indices_front[1]]);
+    Triangle new_tri;
+    new_tri.tex = tri.tex;
+    new_tri.vertex[0] = vertex_intersect0;
+    new_tri.vertex[1] = vertex_intersect1;
+    new_tri.vertex[2] = tri.vertex[indices_front[0]];
+    new_tri.uv[0] = uv_intersect0;
+    new_tri.uv[1] = uv_intersect1;
+    new_tri.uv[2] = tri.uv[indices_front[0]];
+    tris_to_be_drawn.emplace_back(new_tri);
+
+    tri.vertex[indices_behind[0]] = vertex_intersect1;
+    tri.uv[indices_behind[0]] = uv_intersect1;
+    tris_to_be_drawn.emplace_back(tri);
+  } else if (num_vertices_behind == 2) {
+    Vector3 vertex_intersect0 = getZIntersect(tri.vertex[indices_front[0]],
+                                              tri.vertex[indices_behind[0]]);
+    Vector3 vertex_intersect1 = getZIntersect(tri.vertex[indices_front[0]],
+                                              tri.vertex[indices_behind[1]]);
+    // UV interpolation
+    Vector3 uv_intersect0 = getZIntersect(uvz[indices_front[0]], uvz[indices_behind[0]]);
+    Vector3 uv_intersect1 = getZIntersect(uvz[indices_front[0]], uvz[indices_behind[1]]);
+    tri.vertex[indices_behind[0]] = vertex_intersect0;
+    tri.vertex[indices_behind[1]] = vertex_intersect1;
+    tri.uv[indices_behind[0]] = uv_intersect0;
+    tri.uv[indices_behind[1]] = uv_intersect1;
+    tris_to_be_drawn.emplace_back(tri);
+  }
+  return tris_to_be_drawn;
+}
+
+
+void drawTriangle(Triangle &tri)
+{
   // Attributes to interpolate..
   const int attLength = 3;
   float attList[3][attLength];
@@ -55,8 +156,8 @@ void drawTriangle(Triangle &tri)
   {
     float *att = attList[i];
     att[0] = tri.vertex[i][2];
-    att[1] = tri.uv[i][0];
-    att[2] = tri.uv[i][1];
+    att[1] = tri.uv[i][0]/(att[0]/(global.camera.fz-att[0])+1);
+    att[2] = tri.uv[i][1]/(att[0]/(global.camera.fz-att[0])+1);
   }
   
   TriInterp interp;
@@ -92,7 +193,8 @@ void drawTriangle(Triangle &tri)
         
         // Perspective Correction
         // ---------------
-        // ...
+        uv[0]*=(z/(global.camera.fz-z)+1);
+        uv[1]*=(z/(global.camera.fz-z)+1);
         // -------------
         
         // UV to image coordinate.
@@ -100,53 +202,15 @@ void drawTriangle(Triangle &tri)
         uv[1] *= tri.tex.height;
         
         // Color
-        float color[3] = {1,1,1};
-        if (tri.tex.test(uv[1],uv[0]))
-        {
-          //std::cout<<uv[0]<<" "<<uv[1]<<std::endl;
-          
-          // No interpolation.
-          unsigned char *texp = (unsigned char*)tri.tex.ptr(uv[1],uv[0]);
-          for(int i=0;i<3;i++)
-            color[i] = (float)texp[i]/255;
-        }
+        unsigned char color[3]={0,0,0};
+        tri.tex.interp(uv[1],uv[0],color);
         // Shade
         float *pixel = (float*)global.canvas.ptr(r,c);
         for(int i=0;i<3;i++)
-          pixel[i] = min(color[i],1.0f);
+          pixel[i] = min((float)color[i]/255.0f,1.0f);
       }
     }
   }
-  /*
-  
-  
-  Vector3 line[2] = {{0,0,-2},{0,0,2}};
-  cam.projectXsw(line[0].ptr(),line[0].ptr());
-  cam.projectXsw(line[1].ptr(),line[1].ptr());
-  
-  
-  Bresenham linInterp;
-  float att1[4] = {1.0f,0.0f,0.0f,line[0][2]};
-  float att2[4] = {0.0f,0.0f,1.0f,line[1][2]};
-  linInterp.setup(line[0][0],line[0][1],line[1][0],line[1][1],att1,att2,4);
-  
-  int x,y;
-  float att[4];
-  while(linInterp.next(&x,&y,att))
-  {
-    if(x<0 || x>=canvas.width || y<0 || y>=canvas.height)
-      continue;
-    unsigned short z   = (unsigned short)(att[3]*mdepth);
-    unsigned short *dz = ((unsigned short*)depth.ptr(y,x));
-    if(*dz<z)
-      continue;
-    *dz = z;
-    unsigned char *pixel = (unsigned char *)canvas.ptr(y,x);
-    for(int i=0;i<3;i++)
-      pixel[i] = (unsigned char)(att[i]*255);
-  }
-  
-  */
 }
 
 void drawLine(Vector3 srt,Vector3 end,Vector3 color)
@@ -201,7 +265,7 @@ void drawLine(Vector3 srt,Vector3 end,Vector3 color)
 int main(void)
 {
   float SIZE = 100;
-  float DISTANCE = 110;
+  float DISTANCE = 250;
   
   // Initialize the canvas and the depth buffer.
   const int width  = 640;
@@ -212,8 +276,14 @@ int main(void)
   global.depth  = global.depth  * 0 + 1;
 
   // Set up the camera.
-  global.camera.setupExt(-48,30,DISTANCE);
-  global.camera.setupInt(2,1.2*(SIZE+DISTANCE));
+  //
+  float cams[]={0,0,0};
+  float camd[]={1,0,1};
+  float camu[]={0,1,0};
+  //global.camera.setupExt(cams,camd,camu);
+  global.camera.setupExt(cams,80,0);
+  //global.camera.setupExt(-45,35.264,150);
+  global.camera.setupInt(1,1.2*(SIZE+DISTANCE));
   global.camera.setupScn(width,height,false);
   
   // Set up the lights.
@@ -285,13 +355,21 @@ int main(void)
       tri.uv[i]     = uvList[triangleList[k][i+3]];
       tri.tex       = texture;
     }
-    std::cout<<"[input]"<<k<<std::endl;
-    drawTriangle(tri);
+    
+    std::cout<<"======================================"<<std::endl;
+    std::cout<<"Drawing Triangle "<<std::setw(2)<<k<<std::endl;
+    std::cout<<"Vertex-0   "<<tri.vertex[0]<<std::endl;
+    std::cout<<"Vertex-1   "<<tri.vertex[1]<<std::endl;
+    std::cout<<"Vertex-2   "<<tri.vertex[2]<<std::endl;
+    std::cout<<"UV-0       "<<tri.uv[0]<<std::endl;
+    std::cout<<"UV-1       "<<tri.uv[1]<<std::endl;
+    std::cout<<"UV-2       "<<tri.uv[2]<<std::endl;
+    putTriangle(tri);
     
   }
   
   // Draw 12 lines.
-  for(int i=0;i<12;i++)
+  for(int i=0;i<0;i++)
   {
     Vector3 srt = vertexList[lineList[i][0]];
     Vector3 end = vertexList[lineList[i][1]];

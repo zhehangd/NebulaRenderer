@@ -49,7 +49,11 @@ do
   -e "renderer_setup_canvas  $SubWidth $SubHeight" \
   -e "renderer_camera_intrinsic $Focus 600" \
   -e "renderer_camera_extrinsic Rect $SubPos $SubAt 0,1,0" \
+  -e "renderer_set_spectrum 1.0,0.3,0.6 0.2,0.3,0.5" \
+  -e "renderer_draw_skybox skybox.ppm" \
+  -e "renderer_invert_tonemapping" \
   -e "renderer_draw_volume 1" \
+  -e "renderer_tonemapping" \
   -e "renderer_save_canvas view-$$-$k.ppm" \
   
 done

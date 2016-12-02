@@ -15,14 +15,16 @@ nFrames=$2
 # but the start and end time can be specified.
 
 # Position
-posValSrt=(150 -30 10)
-posValEnd=(-100 -30 10)
+#posValSrt=(150 -30 10)
+#posValEnd=(-100 -30 10)
+posValSrt=(200 -30  -10)
+posValEnd=(-160 -30 -10)
 posTimSrt=0
 posTimEnd=$nFrames
 
 # Orientation
-oriValSrt=180
-oriValEnd=180
+oriValSrt=190
+oriValEnd=170
 oriTimSrt=0
 oriTimEnd=$(($nFrames))
 

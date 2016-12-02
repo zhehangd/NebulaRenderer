@@ -62,7 +62,7 @@ public:
   // ------------------- Data Accessing -------------------
   
   // Test a coordinate.
-  bool test(PixCoord r,PixCoord c,PixCoord ch=0){return r>=0 && r<height && c>=0 && c<width && ch>=0 && ch<channel;}
+  bool test(PixCoord r,PixCoord c,PixCoord ch=0)const{return r>=0 && r<height && c>=0 && c<width && ch>=0 && ch<channel;}
   
   // Obtain the one dimensional index of a pixel.
   PixCoord index(PixCoord r,PixCoord c,PixCoord ch=0)const{return r*cdy+c*cdx+ch*elength;}
@@ -165,6 +165,7 @@ public:
   Image(const ImageStruct& src):ImageStruct(src){}
   
   Image roi(PixCoord r,PixCoord c,PixCoord w,PixCoord h)const{return Image(ImageStruct::roi(r,c,w,h));}
+  bool  interp(float r,float c,void *dst)const;
   
   Image operator+(PixArthInt c)const{Image image = this->clone();return image+=c;}
   Image operator-(PixArthInt c)const{Image image = this->clone();return image-=c;}

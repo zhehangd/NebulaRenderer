@@ -33,7 +33,9 @@ bool renderer_draw_axes(Console &console,std::vector<std::string> &argv);
 bool renderer_draw_volume(Console &console,std::vector<std::string> &argv);
 bool renderer_save_canvas(Console &console,std::vector<std::string> &argv);
 bool renderer_set_spectrum(Console &console,std::vector<std::string> &argv);
-
+bool renderer_draw_skybox(Console &console,std::vector<std::string> &argv);
+bool renderer_invert_tonemapping(Console &console,std::vector<std::string> &argv);
+bool renderer_tonemapping(Console &console,std::vector<std::string> &argv);
 
 int main(int argc,const char **argv)
 {
@@ -58,8 +60,12 @@ int main(int argc,const char **argv)
   console.addCommand("renderer_compute_lighting",   renderer_compute_lighting);
   console.addCommand("renderer_draw_cube",     renderer_draw_cube);
   console.addCommand("renderer_draw_axes",    renderer_draw_axes);
+  console.addCommand("renderer_draw_skybox",  renderer_draw_skybox);
   console.addCommand("renderer_draw_volume",  renderer_draw_volume);
   console.addCommand("renderer_save_canvas",  renderer_save_canvas);
+  
+  console.addCommand("renderer_tonemapping",  renderer_tonemapping);
+  console.addCommand("renderer_invert_tonemapping",  renderer_invert_tonemapping);
 
   if(argc==1)
   {
@@ -295,8 +301,8 @@ bool renderer_save_canvas(Console &console,std::vector<std::string> &argv)
       float *pixel = (float*)render.canvas.ptr(r,c);
       for(int k=0;k<3;k++){
         float v = pixel[k];
-        v = v * 2;
-        v = (exp(3*v)-1)/(exp(3*v)+1);
+        //v = v * 2;
+        //v = (exp(3*v)-1)/(exp(3*v)+1);
         pixel[k] = std::fmin(v,1);
       }
     }
@@ -315,5 +321,47 @@ bool renderer_set_spectrum(Console &console,std::vector<std::string> &argv)
   Vector3 reflection; Console::string_cast(argv[1],reflection.ptr(),3);
   render.setSpectrumEmission(emission);
   render.setSpectrumReflection(reflection);
+  return true;
+}
+
+bool renderer_draw_skybox(Console &console,std::vector<std::string> &argv)
+{
+  console.message_status("Draw skybox");
+  if(argv.size()<1)
+    return console.message_error("Expected skybox image file.");
+  Image skybox; 
+  if (imread(argv[0].c_str(),skybox)==false)
+    return console.message_error("Cannot open skybox.");
+  render.drawSkybox(skybox);
+  return true;
+}
+
+bool renderer_invert_tonemapping(Console &console,std::vector<std::string> &argv)
+{
+  for (unsigned int r = 0; r < render.height; r++){
+    for (unsigned int c = 0; c < render.width; c++){
+      float *pixel = (float*)render.canvas.ptr(r,c);
+      for(int k=0;k<3;k++){
+        float v = pixel[k];
+        v = v/(2-v);
+        pixel[k] = std::fmin(v,1);
+      }
+    }
+  }
+  return true;
+}
+
+bool renderer_tonemapping(Console &console,std::vector<std::string> &argv)
+{
+  for (unsigned int r = 0; r < render.height; r++){
+    for (unsigned int c = 0; c < render.width; c++){
+      float *pixel = (float*)render.canvas.ptr(r,c);
+      for(int k=0;k<3;k++){
+        float v = pixel[k];
+        v = 2*v/(v+1);
+        pixel[k] = std::fmin(v,1);
+      }
+    }
+  }
   return true;
 }

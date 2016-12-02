@@ -1,13 +1,14 @@
 renderer_open_material material.vbf
 renderer_open_lighting lighting.vbf
-renderer_setup_canvas  256 256
-renderer_setup_extinct Emission   1,0.1,0.05,0,0
-renderer_setup_extinct Reflection 1,0.1,0,0.05,0
-renderer_camera_extrinsic Polar -90 20 400
-#renderer_camera_extrinsic Rect -100,0,0 -100,0,100 0,1,0
-renderer_camera_intrinsic 2.2 600
+renderer_setup_canvas  640 480
+renderer_setup_extinct Emission   0.1,0.1,2,0,0
+renderer_setup_extinct Reflection 0.1,0.1,0,2,0
+renderer_camera_extrinsic Polar 130 30 400
+renderer_camera_intrinsic 1.8 600
+#renderer_draw_skybox skybox.ppm
 renderer_draw_cube 100
 #renderer_draw_axes 150
+renderer_invert_tonemapping
 renderer_draw_volume 1
+renderer_tonemapping
 renderer_save_canvas output.ppm
-

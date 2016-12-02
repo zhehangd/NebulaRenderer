@@ -11,6 +11,7 @@
 #include <string>
 #include <limits>
 #include <cstdio>
+#include <cmath>
 
 using namespace std;
 
@@ -468,6 +469,90 @@ void iminfo(ImageStruct &image)
   cout<<" ----------------------------- "<<endl;
 }
 
+template<class T>
+bool tImageInterp(const Image &image,float r,float c,void *dst)
+{
+  if (image.test(r,c)==false)
+    return false;
+  PixCoord fr = std::floor(r);
+  PixCoord fc = std::floor(c);
+  PixCoord cr = std::ceil(r);
+  PixCoord cc = std::ceil(c);
+  float ar = r - std::floor(r);
+  float ac = c - std::floor(c);
+
+  if((fr==(image.height-1))&&(fc==(image.width-1)))
+  {
+    T* p1 = (T*)image.ptr(fr,fc);
+    T* p  = (T*)dst;
+    for(int i=0;i<image.channel;i++)
+      p[i] = p1[i];
+    return true;
+  }
+  
+  if(fr==(image.height-1))
+  {
+    T* p1 = (T*)image.ptr(fr,fc);
+    T* p2 = (T*)image.ptr(fr,cc);
+    T* p  = (T*)dst;
+    for(int i=0;i<image.channel;i++)
+      p[i] = (1-ac)*p1[i] + ac*p2[i];
+    return true;
+  }
+  
+  if(fc==(image.width-1))
+  {
+    T* p1 = (T*)image.ptr(fr,fc);
+    T* p3 = (T*)image.ptr(fr,cc);
+    T* p  = (T*)dst;
+    for(int i=0;i<image.channel;i++)
+      p[i] = (1-ar)*p1[i] + ar*p3[i];
+    return true;
+  }
+  
+  if(fr==(image.height-1))
+  {
+    T* s = (T*)image.ptr(fr,fc);
+    T* p = (T*)dst;
+    for(int i=0;i<image.channel;i++)
+      p[i] = s[i];
+  }
+  
+  T* p1 = (T*)image.ptr(fr,fc);
+  T* p2 = (T*)image.ptr(fr,cc);
+  T* p3 = (T*)image.ptr(cr,fc);
+  T* p4 = (T*)image.ptr(cr,cc);
+  
+  float *v1 = new float[image.channel];
+  float *v2 = new float[image.channel];
+  float *v3 = new float[image.channel];
+  for(int i=0;i<image.channel;i++)
+  {
+    v1[i] = (1-ac)*p1[i] + ac*p2[i];
+    v2[i] = (1-ac)*p3[i] + ac*p4[i];
+    v3[i] = (1-ar)*v1[i] + ar*v2[i];
+  }
+
+  T* p = (T*)dst;
+  for(int i=0;i<image.channel;i++)
+    p[i] = v3[i];
+
+  return true;
+}
+
+bool Image::interp(float r,float c,void *dst)const
+{
+  switch(elength)
+  {
+  case IMAGE_U8:
+    return tImageInterp<PixU8>(*this,r,c,dst);
+  case IMAGE_U16:
+    return tImageInterp<PixU16>(*this,r,c,dst);
+  case IMAGE_S32:
+    return tImageInterp<PixS32>(*this,r,c,dst);
+  }
+  return false;
+}
 
 
 #if 0

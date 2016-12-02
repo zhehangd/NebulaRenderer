@@ -22,6 +22,13 @@ public:
   float rv;
 };
 
+struct Triangle
+{
+  Image   tex;
+  Vector3 uv[3]; // ignore the 3rd component.
+  Vector3 vertex[3];
+};
+
 class Renderer
 {
 public:
@@ -80,10 +87,16 @@ public:
 
   // Draw a line.
   void drawLine(Vector3 srt,Vector3 end,Vector3 color);
+  //
+  void drawTriangle(Triangle &tri);
+  
   // Draw a wireframe cube.
   void drawCube(float radius,int tick,Vector3 color);
-  // Draw
+  //
   void drawOrigin(float radius);
+  //
+  void drawSkybox(Image &image);
+  
 
   //
   void drawVolume(float step);

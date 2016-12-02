@@ -204,7 +204,6 @@ void Renderer::drawVolume(float step)
 
         energy *= std::exp(-DaExtv*fstep);
         energy += (DaSctv+DaAmbv)*fstep;
-
       }
       
       for(int i=0;i<3;i++)
@@ -292,5 +291,205 @@ void Renderer::computeLightingVolume(const std::vector<Light> &lightList,float s
 
     if(i%100==0)
       printf("-------- %4.1f%% -------- \r",100.0f*i/numel);
+  }
+}
+
+void drawTrianglePrivate(ImFloat &canvas,Triangle &tri,float fz);
+std::vector<Triangle> checkTriangleAtCameraSpace(Triangle &tri);
+
+void Renderer::drawSkybox(Image &image)
+{
+  float SIZE = 50;
+  Vector3 cameraPosition;
+  camera.getPosition(cameraPosition.ptr());
+  
+  // Vertex List.
+  Vector3 vertexList[8];
+  vertexList[0] = Vector3(-.5,-.5,-.5) * SIZE + cameraPosition;
+  vertexList[1] = Vector3(-.5,-.5, .5) * SIZE + cameraPosition;
+  vertexList[2] = Vector3( .5,-.5, .5) * SIZE + cameraPosition;
+  vertexList[3] = Vector3( .5,-.5,-.5) * SIZE + cameraPosition;
+  vertexList[4] = Vector3(-.5, .5,-.5) * SIZE + cameraPosition;
+  vertexList[5] = Vector3(-.5, .5, .5) * SIZE + cameraPosition;
+  vertexList[6] = Vector3( .5, .5, .5) * SIZE + cameraPosition;
+  vertexList[7] = Vector3( .5, .5,-.5) * SIZE + cameraPosition;
+  
+  // UV List.
+  Vector3 uvList[10];
+  uvList[0] = Vector3(0.00f,1.0f,0);
+  uvList[1] = Vector3(0.25f,1.0f,0);
+  uvList[2] = Vector3(0.50f,1.0f,0);
+  uvList[3] = Vector3(0.75f,1.0f,0);
+  uvList[4] = Vector3(0.00f,0.0f,0);
+  uvList[5] = Vector3(0.25f,0.0f,0);
+  uvList[6] = Vector3(0.50f,0.0f,0);
+  uvList[7] = Vector3(0.75f,0.0f,0);
+  uvList[8] = Vector3(1.00f,1.0f,0);
+  uvList[9] = Vector3(1.00f,0.0f,0);
+  
+  int triangleList[12][6] = {
+    { 0,1,3,0,1,5 }, { 3,1,2,4,1,5 }, { 4,5,7,3,2,7 }, { 7,5,6,7,2,6 },
+    { 1,5,6,1,5,6 }, { 1,2,6,1,2,6 }, { 3,7,0,3,7,8 }, { 4,7,0,9,7,8 },
+    { 0,1,4,0,1,4 }, { 4,5,1,4,5,1 }, { 2,3,7,2,3,7 }, { 2,6,7,2,6,7 }};
+    
+    // Draw all 12 triangles.
+  for(int k=0; k<12 ;k++)
+  {
+    Triangle tri;
+    for(int i=0;i<3;i++)
+    {
+      tri.vertex[i] = vertexList[triangleList[k][i]];
+      tri.uv[i]     = uvList[triangleList[k][i+3]];
+      tri.tex       = image;
+    }
+    drawTriangle(tri);
+    /*
+    std::vector<Triangle> tris_to_be_drawn = checkTriangleAtCameraSpace(tri);
+    for(int i=0;i<tris_to_be_drawn.size();i++)
+    {
+      for(int j=0;j<3;j++)
+        camera.projectXsc(tris_to_be_drawn[i].vertex[j].ptr(),tris_to_be_drawn[i].vertex[j].ptr());
+      drawTrianglePrivate(canvas,tris_to_be_drawn[i],camera.fz);
+    }*/
+  }
+}
+
+
+void Renderer::drawTriangle(Triangle &tri)
+{
+  for(int i=0;i<3;i++)
+    camera.projectXcw(tri.vertex[i].ptr(),tri.vertex[i].ptr());
+  std::vector<Triangle> tris_to_be_drawn = checkTriangleAtCameraSpace(tri);
+  for(int i=0;i<tris_to_be_drawn.size();i++)
+  {
+    for(int j=0;j<3;j++)
+      camera.projectXsc(tris_to_be_drawn[i].vertex[j].ptr(),tris_to_be_drawn[i].vertex[j].ptr());
+    drawTrianglePrivate(canvas,tris_to_be_drawn[i],camera.fz);
+  }
+}
+
+Vector3 getZIntersect(const Vector3 &start, const Vector3 &end) {
+  Vector3 slope = start - end;
+  float t = - start[2]/slope[2];
+  Vector3 result;
+  result[2] = 0;
+  result[0] = start[0] + slope[0] * t;
+  result[1] = start[1] + slope[1] * t;
+  return result;
+}
+
+std::vector<Triangle> checkTriangleAtCameraSpace(Triangle &tri) {
+  std::vector<Triangle> tris_to_be_drawn;
+
+  // Check if the vertices are behind camera
+  int num_vertices_behind = 0;
+  std::vector<int> indices_behind;
+  std::vector<int> indices_front;
+  for (int i = 0; i < 3; i++) {
+    if (tri.vertex[i][2] > 0) {
+      num_vertices_behind++;
+      indices_behind.emplace_back(i);
+    }
+    else {
+      indices_front.emplace_back(i);
+    }
+  }
+
+  // For UV and z interpolation
+  Vector3 uvz[3];
+  for (int i = 0; i < 3; i++) {
+    uvz[i]    = tri.uv[i];
+    uvz[i][2] = tri.vertex[i][2];
+  }
+  
+  if (num_vertices_behind == 0) {
+    tris_to_be_drawn.emplace_back(tri);
+  }
+  else if (num_vertices_behind == 1) {
+    Vector3 vertex_intersect0 = getZIntersect(tri.vertex[indices_behind[0]],
+                                              tri.vertex[indices_front[0]]);
+    Vector3 vertex_intersect1 = getZIntersect(tri.vertex[indices_behind[0]],
+                                              tri.vertex[indices_front[1]]);
+    // UV interpolation
+    Vector3 uv_intersect0 = getZIntersect(uvz[indices_behind[0]], uvz[indices_front[0]]);
+    Vector3 uv_intersect1 = getZIntersect(uvz[indices_behind[0]], uvz[indices_front[1]]);
+    Triangle new_tri;
+    new_tri.tex = tri.tex;
+    new_tri.vertex[0] = vertex_intersect0;
+    new_tri.vertex[1] = vertex_intersect1;
+    new_tri.vertex[2] = tri.vertex[indices_front[0]];
+    new_tri.uv[0] = uv_intersect0;
+    new_tri.uv[1] = uv_intersect1;
+    new_tri.uv[2] = tri.uv[indices_front[0]];
+    tris_to_be_drawn.emplace_back(new_tri);
+
+    tri.vertex[indices_behind[0]] = vertex_intersect1;
+    tri.uv[indices_behind[0]] = uv_intersect1;
+    tris_to_be_drawn.emplace_back(tri);
+  } else if (num_vertices_behind == 2) {
+    Vector3 vertex_intersect0 = getZIntersect(tri.vertex[indices_front[0]],
+                                              tri.vertex[indices_behind[0]]);
+    Vector3 vertex_intersect1 = getZIntersect(tri.vertex[indices_front[0]],
+                                              tri.vertex[indices_behind[1]]);
+    // UV interpolation
+    Vector3 uv_intersect0 = getZIntersect(uvz[indices_front[0]], uvz[indices_behind[0]]);
+    Vector3 uv_intersect1 = getZIntersect(uvz[indices_front[0]], uvz[indices_behind[1]]);
+    tri.vertex[indices_behind[0]] = vertex_intersect0;
+    tri.vertex[indices_behind[1]] = vertex_intersect1;
+    tri.uv[indices_behind[0]] = uv_intersect0;
+    tri.uv[indices_behind[1]] = uv_intersect1;
+    tris_to_be_drawn.emplace_back(tri);
+  }
+  return tris_to_be_drawn;
+}
+
+
+void drawTrianglePrivate(ImFloat &canvas,Triangle &tri,float fz)
+{
+  // Attributes to interpolate..
+  const int attLength = 3;
+  float attList[3][attLength];
+  for(int i=0;i<3;i++)
+  {
+    float *att = attList[i];
+    att[0] = tri.vertex[i][2];
+    att[1] = tri.uv[i][0]/(att[0]/(fz-att[0])+1);
+    att[2] = tri.uv[i][1]/(att[0]/(fz-att[0])+1);
+  }
+  TriInterp interp;
+  interp.setup(tri.vertex[0].ptr(),tri.vertex[1].ptr(),tri.vertex[2].ptr(),
+            attList[0],attList[1],attList[2],attLength);
+  int yMin = std::max((int)std::floor(interp.bbox[1]),0);
+  int yMax = std::max(std::min((int)ceil(interp.bbox[3]),canvas.height-1),0);
+  int xMin = std::max((int)std::floor(interp.bbox[0]),0);
+  int xMax = std::max(std::min((int)ceil(interp.bbox[2]),canvas.width-1),0);
+  for (unsigned int r = yMin; r <= yMax; r++){
+    for (unsigned int c = xMin; c <= xMax; c++){
+      if (interp.evaluate(c,r))
+      {
+        // Interpolate the attributes
+        float attributes[3];
+        interp.interpolate(c,r,attributes);
+        // z and uv
+        float z   = (float)(attributes[0]);
+        float uv[2];
+        uv[0] = attributes[1];
+        uv[1] = attributes[2];
+        // Perspective Correction
+        uv[0]*=(z/(fz-z)+1);
+        uv[1]*=(z/(fz-z)+1);
+        // UV to image coordinate.
+        uv[0] *= tri.tex.width;
+        uv[1] *= tri.tex.height;
+        
+        // Color
+        unsigned char color[3]={0,0,0};
+        tri.tex.interp(uv[1],uv[0],color);
+        // Shade
+        float *pixel = (float*)canvas.ptr(r,c);
+        for(int i=0;i<3;i++)
+          pixel[i] = std::min((float)color[i]/255.0f,1.0f);
+      }
+    }
   }
 }
